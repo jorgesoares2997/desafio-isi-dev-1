@@ -202,3 +202,4 @@ Implementado em `GlobalExceptionHandler.java` com `@RestControllerAdvice`:
 - **Ferramenta Utilizada:** Google Antigravity / Gemini 3.8 Flash.
 - **Escopo do Uso:** A ferramenta foi utilizada como assistente de engenharia para estruturação do scaffold de arquitetura inicial, geração de migrations DDL com validação de constraints, configuração do interceptor Axios de extração de mensagens de erro e implementação dos testes automatizados para as regras RN02 a RN05.
 - **Validação Humana e Autônoma:** Todos os arquivos gerados foram inspecionados, compilados via Maven e validados com testes unitários e de integração sobre instâncias reais do PostgreSQL 16 via Docker Compose.
+# desafio-isi-dev-1
