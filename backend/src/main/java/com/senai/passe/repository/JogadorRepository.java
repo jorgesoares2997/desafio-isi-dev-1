@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface JogadorRepository extends JpaRepository<Jogador, Long>, JpaSpecificationExecutor<Jogador> {
     Optional<Jogador> findByIdAndExcluidoEmIsNull(Long id);
     List<Jogador> findByClubeIdAndExcluidoEmIsNull(Long clubeId);
+    long countByClubeIdAndExcluidoEmIsNull(Long clubeId);
+    List<Jogador> findByExcluidoEmIsNull();
 }

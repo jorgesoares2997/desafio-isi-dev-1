@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface PartidaRepository extends JpaRepository<Partida, Long> {
-    List<Partida> findAllByOrderByJogadaEmDesc();
+    List<Partida> findAllByOrderByJogadaEmDescIdDesc();
+    List<Partida> findByMandanteIdOrVisitanteIdOrderByJogadaEmDescIdDesc(Long mandanteId, Long visitanteId);
 }

@@ -12,4 +12,6 @@ public interface EscalacaoRepository extends JpaRepository<Escalacao, EscalacaoI
     List<Escalacao> findByIdClubeId(Long clubeId);
     void deleteByIdClubeId(Long clubeId);
     void deleteByIdJogadorId(Long jogadorId);
+    long countByIdClubeId(Long clubeId);
+    boolean existsByIdJogadorId(Long jogadorId);
 }
