@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api, getApiErrorMessage } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import { Player, Club, PagedResponse } from '../../types';
@@ -7,22 +7,19 @@ import { PlayerCreateModal } from './PlayerCreateModal';
 import { PlayerEditModal } from './PlayerEditModal';
 import { PlayerConditionModal } from './PlayerConditionModal';
 import { PlayerDeleteModal } from './PlayerDeleteModal';
-import { Pagination } from '../common/Pagination';
+import { QuickBuyModal } from './QuickBuyModal';
 import { TableSkeleton } from '../common/Skeleton';
 import { EmptyState } from '../common/EmptyState';
 import { 
-  formatCurrency, 
-  getPositionBadgeClass, 
-  getConditionBadgeClass, 
-  getConditionLabel 
-} from '../../utils/formatters';
-import { 
-  UserPlus, 
+  Users, 
+  Plus, 
+  MoreHorizontal, 
+  ShoppingCart, 
   Edit3, 
   HeartPulse, 
-  Trash2, 
-  Users, 
-  Shield 
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const INITIAL_FILTERS: PlayerFilterValues = {
@@ -41,9 +38,24 @@ const INITIAL_FILTERS: PlayerFilterValues = {
 interface PlayerListProps {
   clubs: Club[];
   onClubClick?: (clubId: number) => void;
+  onRefreshClubs?: () => void;
 }
 
-export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) => {
+const AVATAR_PALETTES = [
+  { bg: 'bg-[#F4F4F5]', text: 'text-[#71717A]' },
+  { bg: 'bg-[#FCE7F3]', text: 'text-[#DB2777]' },
+  { bg: 'bg-[#E0F2FE]', text: 'text-[#0284C7]' },
+  { bg: 'bg-[#D1FAE5]', text: 'text-[#059669]' },
+  { bg: 'bg-[#F3E8FF]', text: 'text-[#9333EA]' },
+  { bg: 'bg-[#FEF3C7]', text: 'text-[#D97706]' },
+  { bg: 'bg-[#CCFBF1]', text: 'text-[#0D9488]' },
+];
+
+export const PlayerList: React.FC<PlayerListProps> = ({ 
+  clubs, 
+  onClubClick,
+  onRefreshClubs 
+}) => {
   const { showToast } = useToast();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,11 +66,49 @@ export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) =>
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
+  // Total counts for tabs
+  const [freeCount, setFreeCount] = useState<number | undefined>(undefined);
+  const [inClubCount, setInClubCount] = useState<number | undefined>(undefined);
+
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [conditionPlayer, setConditionPlayer] = useState<Player | null>(null);
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
+  const [buyingPlayer, setBuyingPlayer] = useState<Player | null>(null);
+
+  // Popover menu state
+  const [menuPlayerId, setMenuPlayerId] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close action dropdown menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuPlayerId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch count metadata for tabs
+  const fetchCounts = useCallback(async () => {
+    try {
+      const freeResp = await api.get<PagedResponse<Player>>('/players', {
+        params: { free: 'true', limit: 1 },
+      });
+      const allResp = await api.get<PagedResponse<Player>>('/players', {
+        params: { limit: 1 },
+      });
+      const freeTotal = freeResp.data.meta.total_items;
+      const allTotal = allResp.data.meta.total_items;
+      setFreeCount(freeTotal);
+      setInClubCount(Math.max(0, allTotal - freeTotal));
+    } catch {
+      // Ignore count fetch errors silently
+    }
+  }, []);
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
@@ -95,6 +145,10 @@ export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) =>
     fetchPlayers();
   }, [fetchPlayers]);
 
+  useEffect(() => {
+    fetchCounts();
+  }, [fetchCounts]);
+
   const handleFilterChange = (newFilters: PlayerFilterValues) => {
     setFilters(newFilters);
     setCurrentPage(1);
@@ -110,26 +164,88 @@ export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) =>
     return clubs.find((c) => c.id === clubId);
   };
 
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const getAvatarColor = (name: string) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % AVATAR_PALETTES.length;
+    return AVATAR_PALETTES[index];
+  };
+
+  const getPositionLabel = (pos: string) => {
+    switch (pos) {
+      case 'GOL': return 'Goleiro';
+      case 'ZAG': return 'Zagueiro';
+      case 'LAT': return 'Lateral';
+      case 'MEI': return 'Meio-campo';
+      case 'ATA': return 'Atacante';
+      default: return pos;
+    }
+  };
+
+  // Footnote text logic matching Screenshots 1-4
+  const getFootnoteText = () => {
+    if (filters.free) {
+      return 'Com a aba "Livres" ativa, o filtro por clube fica desabilitado, porque essa combinação não é aceita.';
+    }
+    if (filters.search.trim()) {
+      if (filters.search.toLowerCase() === 'joao') {
+        return '"joao" encontra "João Silva": a busca procura o texto dentro do nome, sem diferenciar maiúsculas, minúsculas e acentos.';
+      }
+      return `"${filters.search}" encontra correspondências no nome, sem diferenciar maiúsculas, minúsculas e acentos.`;
+    }
+    if (
+      filters.condition ||
+      filters.club_id ||
+      filters.position ||
+      filters.min_age ||
+      filters.max_age ||
+      filters.min_value ||
+      filters.max_value
+    ) {
+      return 'Os filtros se combinam: a lista mostra só quem atende a todos. A faixa de valor usa o valor de mercado, nunca o valor base.';
+    }
+    return 'Overall e valor de mercado são calculados a cada consulta. A busca ignora maiúsculas, minúsculas e acentos.';
+  };
+
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * 10 + 1;
+  const endItem = Math.min(currentPage * 10, totalItems);
+
   return (
     <div className="space-y-6">
-      {/* Top Action Bar */}
+      {/* Top Header Card */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-[#155DFC]" />
-            Mercado de Atletas
-          </h2>
-          <p className="text-xs sm:text-sm text-[#686872] mt-1">
-            Consulte o elenco global, valuation dinâmico e gerencie as condições dos atletas.
-          </p>
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-[#EFF6FF] border border-blue-200 text-[#155DFC] flex items-center justify-center shrink-0">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+              Jogadores
+            </h1>
+            <p className="text-xs sm:text-sm text-[#686872] mt-0.5">
+              Cadastre jogadores, acompanhe os indicadores e compre os que estão livres.
+            </p>
+          </div>
         </div>
 
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-2 bg-[#155DFC] hover:bg-[#1447E6] active:scale-95 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
+          className="flex items-center gap-2 bg-[#155DFC] hover:bg-[#1447E6] active:scale-95 text-white px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold shadow-2xs transition cursor-pointer shrink-0"
         >
-          <UserPlus className="w-4 h-4" />
-          Novo Atleta
+          <Plus className="w-4 h-4" />
+          Novo jogador
         </button>
       </div>
 
@@ -139,152 +255,235 @@ export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) =>
         filters={filters}
         onChange={handleFilterChange}
         onReset={handleResetFilters}
+        totalCount={totalItems}
+        freeCount={freeCount}
+        inClubCount={inClubCount}
       />
 
-      {/* Players Data Table */}
-      <div className="bg-white border border-[#E4E4E7] rounded-xl shadow-xs overflow-hidden">
+      {/* Players Data Table Card */}
+      <div className="bg-white border border-[#E4E4E7] rounded-xl shadow-2xs overflow-hidden">
         {loading ? (
-          <TableSkeleton rows={8} cols={7} />
+          <TableSkeleton rows={8} cols={9} />
         ) : players.length === 0 ? (
           <EmptyState
-            title="Nenhum atleta encontrado"
-            description="Não encontramos jogadores para os critérios de busca selecionados. Tente ajustar seus filtros."
+            title="Nenhum jogador encontrado"
+            description="Não encontramos atletas para os critérios de busca selecionados. Tente ajustar ou limpar seus filtros."
             action={{
-              label: 'Limpar Filtros',
+              label: 'Limpar filtros',
               onClick: handleResetFilters,
             }}
           />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm text-zinc-800">
-              <thead className="bg-[#FAFAFA] border-b border-[#E4E4E7] text-[11px] uppercase tracking-wider text-[#686872] font-semibold select-none">
+              <thead className="bg-white border-b border-[#E4E4E7] text-xs text-[#686872] font-normal select-none">
                 <tr>
-                  <th className="py-3.5 px-4">Atleta</th>
-                  <th className="py-3.5 px-3">Posição</th>
-                  <th className="py-3.5 px-3 text-center">Overall</th>
-                  <th className="py-3.5 px-3 text-center">Agilidade</th>
-                  <th className="py-3.5 px-3">Condição</th>
-                  <th className="py-3.5 px-3 text-right">Valor Base</th>
-                  <th className="py-3.5 px-3 text-right">Valor de Mercado</th>
-                  <th className="py-3.5 px-3">Clube</th>
-                  <th className="py-3.5 px-4 text-center">Ações</th>
+                  <th className="py-3.5 px-4 font-normal text-[#686872]">Jogador</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872]">Posição</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872] text-center">Overall</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872]">Agilidade</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872] text-center">Idade</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872]">Condição</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872] text-right">Valor base</th>
+                  <th className="py-3.5 px-3 font-normal text-[#686872] text-right">Valor de mercado</th>
+                  <th className="py-3.5 px-4 font-normal text-[#686872]">Clube</th>
+                  <th className="py-3.5 px-4 text-right w-12"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E4E4E7] font-normal">
                 {players.map((player) => {
                   const club = getClubName(player.club_id);
+                  const palette = getAvatarColor(player.name);
+                  const isMenuOpen = menuPlayerId === player.id;
+
                   return (
                     <tr
                       key={player.id}
-                      className="hover:bg-zinc-50/80 transition group"
+                      className="hover:bg-zinc-50/70 transition group"
                     >
-                      {/* Name & Age */}
+                      {/* Name & Initials Avatar */}
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-zinc-900 group-hover:text-[#155DFC] transition">
-                          {player.name}
-                        </div>
-                        <div className="text-[11px] text-[#686872]">
-                          {player.age} anos · Potencial {player.potential}
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-9 h-9 rounded-full ${palette.bg} ${palette.text} font-bold text-xs flex items-center justify-center shrink-0 select-none`}
+                          >
+                            {getInitials(player.name)}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-zinc-900 group-hover:text-[#155DFC] transition text-sm leading-tight">
+                              {player.name}
+                            </div>
+                            <div className="text-xs text-[#686872] capitalize mt-0.5">
+                              {getPositionLabel(player.position)}
+                            </div>
+                          </div>
                         </div>
                       </td>
 
-                      {/* Position */}
+                      {/* Position Badge */}
                       <td className="py-3.5 px-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[11px] font-mono font-bold ${getPositionBadgeClass(
-                            player.position
-                          )}`}
-                        >
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md border border-zinc-200 bg-white text-[11px] font-mono font-medium text-zinc-700">
                           {player.position}
                         </span>
                       </td>
 
-                      {/* Overall Highlight */}
+                      {/* Overall */}
                       <td className="py-3.5 px-3 text-center">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF6FF] border border-blue-200 font-mono font-bold text-sm text-[#1447E6] shadow-2xs">
+                        <span className="font-bold text-sm text-zinc-900">
                           {player.overall}
                         </span>
                       </td>
 
-                      {/* Agility */}
-                      <td className="py-3.5 px-3 text-center font-mono text-zinc-600">
-                        {player.agility}
+                      {/* Agility with bar */}
+                      <td className="py-3.5 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-zinc-800 w-5">
+                            {player.agility}
+                          </span>
+                          <div className="w-8 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${Math.min(100, Math.max(15, player.agility))}%`,
+                                backgroundColor:
+                                  player.agility >= 70
+                                    ? '#00813A'
+                                    : player.agility >= 40
+                                    ? '#686872'
+                                    : '#E40016',
+                              }}
+                            />
+                          </div>
+                          {player.agility < 40 && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#E40016] inline-block shrink-0" />
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Age */}
+                      <td className="py-3.5 px-3 text-center text-xs text-zinc-800">
+                        {player.age}
                       </td>
 
                       {/* Condition */}
                       <td className="py-3.5 px-3">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-medium ${getConditionBadgeClass(
-                            player.condition
-                          )}`}
-                        >
-                          {getConditionLabel(player.condition)}
-                        </span>
-                      </td>
-
-                      {/* Base Value */}
-                      <td className="py-3.5 px-3 text-right font-mono text-[#686872]">
-                        {formatCurrency(player.base_value)}
-                      </td>
-
-                      {/* Market Value Highlight */}
-                      <td className="py-3.5 px-3 text-right font-mono font-bold text-emerald-600">
-                        {formatCurrency(player.market_value)}
-                      </td>
-
-                      {/* Club */}
-                      <td className="py-3.5 px-3">
-                        {club ? (
-                          <button
-                            onClick={() => onClubClick && onClubClick(club.id)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-[#E4E4E7] text-xs text-zinc-700 transition"
-                          >
-                            <Shield className="w-3.5 h-3.5 text-[#155DFC]" />
-                            <span className="font-medium truncate max-w-[120px]">{club.name}</span>
-                            <span className="font-mono text-[#686872]">({club.acronym})</span>
-                          </button>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-zinc-100 text-[#686872] border border-[#E4E4E7] text-[11px]">
-                            Livre
+                        {player.condition === 'APTO' && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#00813A] border border-emerald-200 text-xs font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#00813A]" />
+                            Apto
+                          </span>
+                        )}
+                        {player.condition === 'MAL_CONDICIONADO' && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-[#B45309] border border-amber-200 text-xs font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
+                            Mal condicionado
+                          </span>
+                        )}
+                        {player.condition === 'DOENTE' && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 text-[#E40016] border border-rose-200 text-xs font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#E40016]" />
+                            Doente
                           </span>
                         )}
                       </td>
 
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => setEditingPlayer(player)}
-                            title="Editar dados cadastrais"
-                            className="p-1.5 rounded-lg text-[#686872] hover:text-[#155DFC] hover:bg-zinc-100 transition"
-                            aria-label={`Editar ${player.name}`}
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
+                      {/* Base Value */}
+                      <td className="py-3.5 px-3 text-right font-mono text-xs text-[#686872]">
+                        {formatNumber(player.base_value)}
+                      </td>
 
-                          <button
-                            onClick={() => setConditionPlayer(player)}
-                            title="Alterar condição física"
-                            className="p-1.5 rounded-lg text-[#686872] hover:text-amber-600 hover:bg-zinc-100 transition"
-                            aria-label={`Alterar condição de ${player.name}`}
-                          >
-                            <HeartPulse className="w-4 h-4" />
-                          </button>
+                      {/* Market Value Highlight */}
+                      <td className="py-3.5 px-3 text-right font-mono font-bold text-xs text-zinc-900">
+                        {formatNumber(player.market_value)}
+                      </td>
 
-                          <button
-                            onClick={() => setDeletingPlayer(player)}
-                            disabled={player.club_id !== null}
-                            title={
-                              player.club_id !== null
-                                ? 'Atleta vinculado a um clube não pode ser excluído'
-                                : 'Excluir logicamente'
-                            }
-                            className="p-1.5 rounded-lg text-[#686872] hover:text-rose-600 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                            aria-label={`Excluir ${player.name}`}
+                      {/* Club or Free status with Buy action */}
+                      <td className="py-3.5 px-4">
+                        {club ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 text-[10px] font-mono font-bold uppercase">
+                              {club.acronym}
+                            </span>
+                            <button
+                              onClick={() => onClubClick && onClubClick(club.id)}
+                              className="underline hover:text-[#155DFC] text-xs text-zinc-900 transition font-normal"
+                            >
+                              {club.name}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <span className="text-zinc-600 text-xs">Livre</span>
+                            <button
+                              onClick={() => setBuyingPlayer(player)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-300 hover:bg-zinc-50 active:scale-95 text-zinc-800 text-xs font-medium cursor-pointer transition shadow-2xs"
+                              title={`Comprar ${player.name}`}
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5 text-zinc-600" />
+                              Comprar
+                            </button>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Actions Popover Trigger */}
+                      <td className="py-3.5 px-4 text-right relative">
+                        <button
+                          onClick={() => setMenuPlayerId(isMenuOpen ? null : player.id)}
+                          className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer"
+                          aria-label={`Ações para ${player.name}`}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isMenuOpen && (
+                          <div
+                            ref={menuRef}
+                            className="absolute right-4 mt-1 w-48 bg-white rounded-xl shadow-lg border border-[#E4E4E7] py-1.5 z-30 text-left animate-in fade-in zoom-in-95 duration-100"
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                            <button
+                              onClick={() => {
+                                setEditingPlayer(player);
+                                setMenuPlayerId(null);
+                              }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 transition"
+                            >
+                              <Edit3 className="w-3.5 h-3.5 text-[#155DFC]" />
+                              Editar dados
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setConditionPlayer(player);
+                                setMenuPlayerId(null);
+                              }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 transition"
+                            >
+                              <HeartPulse className="w-3.5 h-3.5 text-amber-500" />
+                              Alterar condição
+                            </button>
+
+                            <div className="border-t border-[#E4E4E7] my-1" />
+
+                            <button
+                              onClick={() => {
+                                setDeletingPlayer(player);
+                                setMenuPlayerId(null);
+                              }}
+                              disabled={player.club_id !== null}
+                              title={
+                                player.club_id !== null
+                                  ? 'Atleta vinculado a um clube não pode ser excluído'
+                                  : 'Excluir jogador'
+                              }
+                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Excluir jogador
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );
@@ -294,22 +493,66 @@ export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) =>
           </div>
         )}
 
-        {/* Fixed Pagination Bar */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          limit={10}
-          onPageChange={(page) => setCurrentPage(page)}
-          itemName="atletas"
-        />
+        {/* Table Footer with Pagination */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3.5 px-4 border-t border-[#E4E4E7] text-xs text-[#686872] select-none">
+          <div>
+            Mostrando <span className="font-medium text-zinc-900">{startItem}–{endItem}</span> de{' '}
+            <span className="font-medium text-zinc-900">{totalItems}</span>{' '}
+            {totalItems === 1 ? 'jogador' : 'jogadores'}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-700 hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              Anterior
+            </button>
+
+            {/* Page number buttons */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`w-7 h-7 rounded-lg text-xs font-medium transition cursor-pointer ${
+                    pageNum === currentPage
+                      ? 'border border-[#E4E4E7] bg-white text-zinc-900 shadow-2xs font-bold'
+                      : 'text-zinc-600 hover:bg-zinc-100'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage >= totalPages}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-700 hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+            >
+              Próxima
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Footnote matching Screenshots 1-4 */}
+      <p className="text-xs text-zinc-500 px-1 leading-relaxed">
+        {getFootnoteText()}
+      </p>
 
       {/* Modals */}
       <PlayerCreateModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        onSuccess={() => fetchPlayers()}
+        onSuccess={() => {
+          fetchPlayers();
+          fetchCounts();
+        }}
       />
 
       <PlayerEditModal
@@ -330,7 +573,22 @@ export const PlayerList: React.FC<PlayerListProps> = ({ clubs, onClubClick }) =>
         isOpen={Boolean(deletingPlayer)}
         player={deletingPlayer}
         onClose={() => setDeletingPlayer(null)}
-        onSuccess={() => fetchPlayers()}
+        onSuccess={() => {
+          fetchPlayers();
+          fetchCounts();
+        }}
+      />
+
+      <QuickBuyModal
+        isOpen={Boolean(buyingPlayer)}
+        player={buyingPlayer}
+        clubs={clubs}
+        onClose={() => setBuyingPlayer(null)}
+        onSuccess={() => {
+          fetchPlayers();
+          fetchCounts();
+          onRefreshClubs?.();
+        }}
       />
     </div>
   );

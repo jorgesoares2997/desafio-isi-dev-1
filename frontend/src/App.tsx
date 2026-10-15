@@ -1,20 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api, getApiErrorMessage } from './services/api';
-import { Club } from './types';
+import { Club, MatchSummary, PagedResponse, Player } from './types';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { HomeScreen } from './components/home/HomeScreen';
 import { PlayerList } from './components/players/PlayerList';
 import { ClubList } from './components/clubs/ClubList';
 import { ClubDetailView } from './components/clubs/ClubDetailView';
 import { LeagueModule } from './components/league/LeagueModule';
-import { 
-  Home,
-  Users, 
-  Shield, 
-  Trophy, 
-  Menu, 
-  X 
-} from 'lucide-react';
+import { Sidebar } from './components/layout/Sidebar';
+import { BreadcrumbsHeader } from './components/layout/BreadcrumbsHeader';
+import { ClubCreateModal } from './components/clubs/ClubCreateModal';
 
 export function App() {
   return (
@@ -31,196 +26,99 @@ function MainApp() {
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loadingClubs, setLoadingClubs] = useState(false);
-  const [apiOnline, setApiOnline] = useState<boolean | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [totalPlayers, setTotalPlayers] = useState(23);
+  const [totalMatches, setTotalMatches] = useState(2);
+  const [latestMatch, setLatestMatch] = useState<{
+    home: string;
+    away: string;
+    homeGoals: number;
+    awayGoals: number;
+  } | null>({
+    home: 'Delta FC',
+    away: 'Águias FC',
+    homeGoals: 2,
+    awayGoals: 1,
+  });
 
-  // Carregar clubes para disponibilizar em filtros e na aba de clubes
+  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+  const [isClubCreateOpen, setIsClubCreateOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch clubs
   const fetchClubs = useCallback(async () => {
     setLoadingClubs(true);
     try {
       const res = await api.get<Club[]>('/clubs');
       setClubs(res.data);
-      setApiOnline(true);
     } catch (err) {
-      setApiOnline(false);
       showToast('error', getApiErrorMessage(err));
     } finally {
       setLoadingClubs(false);
     }
   }, [showToast]);
 
+  // Fetch league summary metrics (total players and matches)
+  const fetchMetrics = useCallback(async () => {
+    try {
+      const [playersRes, matchesRes] = await Promise.all([
+        api.get<PagedResponse<Player>>('/players', { params: { limit: 1 } }),
+        api.get<MatchSummary[]>('/matches'),
+      ]);
+
+      if (playersRes.data?.meta?.total_items !== undefined) {
+        setTotalPlayers(playersRes.data.meta.total_items);
+      }
+
+      if (Array.isArray(matchesRes.data)) {
+        setTotalMatches(matchesRes.data.length);
+        if (matchesRes.data.length > 0) {
+          const last = matchesRes.data[matchesRes.data.length - 1];
+          setLatestMatch({
+            home: last.home.club_name,
+            away: last.away.club_name,
+            homeGoals: last.home.goals,
+            awayGoals: last.away.goals,
+          });
+        }
+      }
+    } catch {
+      // Use defaults if unavailable
+    }
+  }, []);
+
+  const handleGlobalRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([fetchClubs(), fetchMetrics()]);
+    setRefreshing(false);
+    showToast('success', 'Dados atualizados com sucesso.');
+  }, [fetchClubs, fetchMetrics, showToast]);
+
   useEffect(() => {
     fetchClubs();
-  }, [fetchClubs]);
+    fetchMetrics();
+  }, [fetchClubs, fetchMetrics]);
 
   const handleSelectClub = (clubId: number) => {
     setSelectedClubId(clubId);
     setActiveTab('clubs');
-    setMobileMenuOpen(false);
+    setSidebarMobileOpen(false);
   };
 
   const handleTabChange = (tab: 'home' | 'players' | 'clubs' | 'league') => {
     setActiveTab(tab);
-    setMobileMenuOpen(false);
+    setSidebarMobileOpen(false);
     if (tab !== 'clubs') {
       setSelectedClubId(null);
     }
   };
 
-  return (
-    <div className={`min-h-screen ${activeTab === 'home' ? 'bg-white' : 'bg-[#FAFAFA]'} text-zinc-900 flex flex-col font-sans selection:bg-[#155DFC] selection:text-white`}>
-      {/* Top Header - Oculto na tela de onboarding */}
-      {activeTab !== 'home' && (
-        <header className="border-b border-[#E4E4E7] bg-white/95 backdrop-blur sticky top-0 z-40 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            {/* Logo & Brand */}
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('home')}>
-              <img 
-                src="/logo.png" 
-                alt="Passe Logo" 
-                className="w-9 h-9 rounded-xl object-contain shadow-md shadow-blue-500/20" 
-              />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold tracking-tight text-lg text-zinc-900">Passe</span>
-                  <span className="text-[10px] font-mono font-semibold text-[#155DFC] bg-[#EFF6FF] border border-blue-200 px-1.5 py-0.5 rounded">
-                    F5
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#686872] leading-none hidden sm:block">
-                  Gestão &amp; Simulação de Futebol
-                </p>
-              </div>
-            </div>
+  const selectedClub = clubs.find((c) => c.id === selectedClubId);
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-xl border border-[#E4E4E7]">
-              <button
-                onClick={() => handleTabChange('home')}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60 transition"
-              >
-                <Home className="w-4 h-4" />
-                Início
-              </button>
-
-              <button
-                onClick={() => handleTabChange('players')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'players'
-                    ? 'bg-[#155DFC] text-white shadow-xs'
-                    : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-                }`}
-              >
-                <Users className="w-4 h-4" />
-                Jogadores
-              </button>
-
-              <button
-                onClick={() => handleTabChange('clubs')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'clubs'
-                    ? 'bg-[#155DFC] text-white shadow-xs'
-                    : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-                }`}
-              >
-                <Shield className="w-4 h-4" />
-                Clubes
-              </button>
-
-              <button
-                onClick={() => handleTabChange('league')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'league'
-                    ? 'bg-[#155DFC] text-white shadow-xs'
-                    : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-                }`}
-              >
-                <Trophy className="w-4 h-4" />
-                Liga &amp; Simulação
-              </button>
-            </nav>
-
-            {/* Right Status & Mobile Toggle */}
-            <div className="flex items-center gap-3">
-              {/* Status da Conexão */}
-              <div className="flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-white border border-[#E4E4E7] shadow-2xs">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    apiOnline === true
-                      ? 'bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50'
-                      : apiOnline === false
-                      ? 'bg-rose-500'
-                      : 'bg-amber-500'
-                  }`}
-                />
-                <span className="text-[#686872] font-mono text-[11px] hidden sm:inline">
-                  API {apiOnline === true ? 'Online' : apiOnline === false ? 'Offline' : 'Verificando'}
-                </span>
-              </div>
-
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg bg-white text-zinc-600 hover:text-zinc-900 border border-[#E4E4E7] transition shadow-2xs"
-                aria-label="Abrir menu"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Dropdown Menu (375px responsive support) */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-[#E4E4E7] bg-white px-4 py-3 space-y-1 shadow-md animate-in slide-in-from-top duration-200">
-              <button
-                onClick={() => handleTabChange('home')}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-[#686872] hover:bg-zinc-100 hover:text-zinc-900 transition"
-              >
-                <Home className="w-4 h-4" />
-                Início
-              </button>
-              <button
-                onClick={() => handleTabChange('players')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                  activeTab === 'players'
-                    ? 'bg-[#155DFC] text-white'
-                    : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-                }`}
-              >
-                <Users className="w-4 h-4" />
-                Jogadores
-              </button>
-              <button
-                onClick={() => handleTabChange('clubs')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                  activeTab === 'clubs'
-                    ? 'bg-[#155DFC] text-white'
-                    : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-                }`}
-              >
-                <Shield className="w-4 h-4" />
-                Clubes
-              </button>
-              <button
-                onClick={() => handleTabChange('league')}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                  activeTab === 'league'
-                    ? 'bg-[#155DFC] text-white'
-                    : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-                }`}
-              >
-                <Trophy className="w-4 h-4" />
-                Liga &amp; Simulação
-              </button>
-            </div>
-          )}
-        </header>
-      )}
-
-      {/* Main Container */}
-      <main className={activeTab === 'home' ? 'w-full flex-1 flex flex-col justify-center' : 'max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full'}>
-        {/* Renderização Condicional de Módulos */}
-        {activeTab === 'home' && (
+  // Onboarding screen: 100% full-canvas, no sidebar, no topbar
+  if (activeTab === 'home') {
+    return (
+      <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans selection:bg-[#155DFC] selection:text-white">
+        <main className="w-full flex-1 flex flex-col justify-center">
           <HomeScreen
             onStart={() => handleTabChange('players')}
             onNavigate={(tab, clubId) => {
@@ -228,42 +126,82 @@ function MainApp() {
               if (clubId) setSelectedClubId(clubId);
             }}
           />
-        )}
+        </main>
+      </div>
+    );
+  }
 
-        {activeTab === 'players' && (
-          <PlayerList clubs={clubs} onClubClick={handleSelectClub} />
-        )}
+  // App layout with persistent Sidebar on the left and BreadcrumbsHeader on top
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 flex font-sans selection:bg-[#155DFC] selection:text-white">
+      {/* Left Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        selectedClubId={selectedClubId}
+        clubs={clubs}
+        totalPlayers={totalPlayers}
+        totalMatches={totalMatches}
+        latestMatch={latestMatch}
+        onTabChange={handleTabChange}
+        onSelectClub={handleSelectClub}
+        onCreateClub={() => setIsClubCreateOpen(true)}
+        isOpen={sidebarMobileOpen}
+        onClose={() => setSidebarMobileOpen(false)}
+      />
 
-        {activeTab === 'clubs' && (
-          selectedClubId ? (
-            <ClubDetailView
-              clubId={selectedClubId}
-              onBack={() => {
-                setSelectedClubId(null);
-                fetchClubs();
-              }}
-            />
-          ) : (
-            <ClubList
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <BreadcrumbsHeader
+          activeTab={activeTab}
+          selectedClubName={selectedClub?.name}
+          onRefresh={handleGlobalRefresh}
+          onToggleSidebar={() => setSidebarMobileOpen(true)}
+          refreshing={refreshing}
+        />
+
+        <main className="flex-1 px-4 sm:px-8 py-6 sm:py-8 max-w-[1366px] w-full mx-auto">
+          {activeTab === 'players' && (
+            <PlayerList
               clubs={clubs}
-              loading={loadingClubs}
-              onRefresh={fetchClubs}
-              onSelectClub={handleSelectClub}
+              onClubClick={handleSelectClub}
+              onRefreshClubs={fetchClubs}
             />
-          )
-        )}
+          )}
 
-        {activeTab === 'league' && (
-          <LeagueModule />
-        )}
-      </main>
+          {activeTab === 'clubs' && (
+            selectedClubId ? (
+              <ClubDetailView
+                clubId={selectedClubId}
+                onBack={() => {
+                  setSelectedClubId(null);
+                  fetchClubs();
+                }}
+              />
+            ) : (
+              <ClubList
+                clubs={clubs}
+                loading={loadingClubs}
+                onRefresh={fetchClubs}
+                onSelectClub={handleSelectClub}
+              />
+            )
+          )}
 
-      {/* Footer - Oculto na tela de onboarding */}
-      {activeTab !== 'home' && (
-        <footer className="border-t border-[#E4E4E7] bg-white py-4 text-center text-xs text-[#686872] font-mono">
-          <p>Passe - SENAI/PE · FASE 5 Frontend React + TypeScript + Tailwind CSS</p>
-        </footer>
-      )}
+          {activeTab === 'league' && (
+            <LeagueModule />
+          )}
+        </main>
+      </div>
+
+      {/* Quick Club Creation Modal accessible from Sidebar (+) */}
+      <ClubCreateModal
+        isOpen={isClubCreateOpen}
+        onClose={() => setIsClubCreateOpen(false)}
+        onSuccess={() => {
+          fetchClubs();
+          fetchMetrics();
+        }}
+      />
     </div>
   );
 }
