@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { api, getApiErrorMessage } from './services/api';
 import { Club } from './types';
 import { ToastProvider, useToast } from './context/ToastContext';
+import { HomeScreen } from './components/home/HomeScreen';
 import { PlayerList } from './components/players/PlayerList';
 import { ClubList } from './components/clubs/ClubList';
 import { ClubDetailView } from './components/clubs/ClubDetailView';
 import { LeagueModule } from './components/league/LeagueModule';
 import { 
+  Home,
   Users, 
   Shield, 
   Trophy, 
@@ -24,7 +26,7 @@ export function App() {
 
 function MainApp() {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'players' | 'clubs' | 'league'>('players');
+  const [activeTab, setActiveTab] = useState<'home' | 'players' | 'clubs' | 'league'>('home');
   const [selectedClubId, setSelectedClubId] = useState<number | null>(null);
 
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -57,7 +59,7 @@ function MainApp() {
     setMobileMenuOpen(false);
   };
 
-  const handleTabChange = (tab: 'players' | 'clubs' | 'league') => {
+  const handleTabChange = (tab: 'home' | 'players' | 'clubs' | 'league') => {
     setActiveTab(tab);
     setMobileMenuOpen(false);
     if (tab !== 'clubs') {
@@ -71,7 +73,7 @@ function MainApp() {
       <header className="border-b border-[#E4E4E7] bg-white/95 backdrop-blur sticky top-0 z-40 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('players')}>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('home')}>
             <div className="w-9 h-9 rounded-xl bg-[#155DFC] flex items-center justify-center font-black text-white shadow-md shadow-blue-500/20 text-lg tracking-tight">
               P
             </div>
@@ -90,6 +92,18 @@ function MainApp() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-xl border border-[#E4E4E7]">
+            <button
+              onClick={() => handleTabChange('home')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                activeTab === 'home'
+                  ? 'bg-[#155DFC] text-white shadow-xs'
+                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              Início
+            </button>
+
             <button
               onClick={() => handleTabChange('players')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
@@ -160,6 +174,17 @@ function MainApp() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-[#E4E4E7] bg-white px-4 py-3 space-y-1 shadow-md animate-in slide-in-from-top duration-200">
             <button
+              onClick={() => handleTabChange('home')}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
+                activeTab === 'home'
+                  ? 'bg-[#155DFC] text-white'
+                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              Início
+            </button>
+            <button
               onClick={() => handleTabChange('players')}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
                 activeTab === 'players'
@@ -199,6 +224,16 @@ function MainApp() {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full">
         {/* Renderização Condicional de Módulos */}
+        {activeTab === 'home' && (
+          <HomeScreen
+            onStart={() => handleTabChange('players')}
+            onNavigate={(tab, clubId) => {
+              handleTabChange(tab);
+              if (clubId) setSelectedClubId(clubId);
+            }}
+          />
+        )}
+
         {activeTab === 'players' && (
           <PlayerList clubs={clubs} onClubClick={handleSelectClub} />
         )}
