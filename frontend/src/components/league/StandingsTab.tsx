@@ -33,38 +33,38 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ refreshTrigger }) =>
   const getPositionBadge = (pos: number) => {
     if (pos === 1) {
       return (
-        <span className="inline-flex items-center gap-1 font-bold text-amber-300">
-          <Medal className="w-4 h-4 text-amber-400 fill-amber-400" /> 1º
+        <span className="inline-flex items-center gap-1 font-bold text-amber-600">
+          <Medal className="w-4 h-4 text-amber-500 fill-amber-500" /> 1º
         </span>
       );
     }
     if (pos === 2) {
       return (
-        <span className="inline-flex items-center gap-1 font-bold text-zinc-300">
-          <Medal className="w-4 h-4 text-zinc-300 fill-zinc-300" /> 2º
+        <span className="inline-flex items-center gap-1 font-bold text-zinc-600">
+          <Medal className="w-4 h-4 text-zinc-400 fill-zinc-400" /> 2º
         </span>
       );
     }
     if (pos === 3) {
       return (
-        <span className="inline-flex items-center gap-1 font-bold text-amber-600">
-          <Medal className="w-4 h-4 text-amber-600 fill-amber-600" /> 3º
+        <span className="inline-flex items-center gap-1 font-bold text-amber-700">
+          <Medal className="w-4 h-4 text-amber-700 fill-amber-700" /> 3º
         </span>
       );
     }
-    return <span className="font-mono text-zinc-400">{pos}º</span>;
+    return <span className="font-mono text-[#686872]">{pos}º</span>;
   };
 
   return (
     <div className="space-y-6">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 sm:p-6 shadow-sm">
+      <div className="bg-white border border-[#E4E4E7] rounded-xl p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-500" />
               Tabela de Classificação Oficial (RN21)
             </h3>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-[#686872] mt-1">
               Critérios de desempate: Pontos (V=3, E=1, D=0) &gt; Saldo de Gols &gt; Gols Pró &gt; Ordem Alfabética (NFD).
             </p>
           </div>
@@ -72,17 +72,17 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ refreshTrigger }) =>
           <button
             onClick={fetchStandings}
             disabled={loading}
-            className="flex items-center gap-1.5 self-start sm:self-auto text-xs font-medium bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-zinc-200 px-3.5 py-2 rounded-lg border border-zinc-700 transition"
+            className="flex items-center gap-1.5 self-start sm:self-auto text-xs font-semibold bg-white hover:bg-zinc-50 active:scale-95 text-zinc-700 px-3.5 py-2 rounded-lg border border-[#E4E4E7] shadow-2xs transition"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#155DFC]' : ''}`} />
             Atualizar Tabela
           </button>
         </div>
 
         {/* Tabela de Classificação com Overflow horizontal interno */}
-        <div className="overflow-x-auto rounded-lg border border-zinc-800">
+        <div className="overflow-x-auto rounded-lg border border-[#E4E4E7]">
           <table className="w-full text-left text-sm border-collapse">
-            <thead className="bg-zinc-950 text-zinc-400 text-xs uppercase tracking-wider font-semibold border-b border-zinc-800">
+            <thead className="bg-[#FAFAFA] text-[#686872] text-xs uppercase tracking-wider font-semibold border-b border-[#E4E4E7]">
               <tr>
                 <th className="py-3 px-4 w-16 text-center">Pos</th>
                 <th className="py-3 px-4">Clube</th>
@@ -93,10 +93,10 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ refreshTrigger }) =>
                 <th className="py-3 px-3 text-center" title="Gols Pró">GP</th>
                 <th className="py-3 px-3 text-center" title="Gols Contra">GC</th>
                 <th className="py-3 px-3 text-center" title="Saldo de Gols">SG</th>
-                <th className="py-3 px-4 text-center font-bold text-zinc-100" title="Pontos Ganhos">PTS</th>
+                <th className="py-3 px-4 text-center font-bold text-zinc-900" title="Pontos Ganhos">PTS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800 bg-zinc-900/40">
+            <tbody className="divide-y divide-[#E4E4E7] bg-white">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <tr key={i}>
@@ -114,7 +114,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ refreshTrigger }) =>
                 ))
               ) : standings.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-zinc-500 text-xs">
+                  <td colSpan={10} className="py-8 text-center text-[#686872] text-xs">
                     Nenhum clube classificado ou dados não disponíveis.
                   </td>
                 </tr>
@@ -122,40 +122,40 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ refreshTrigger }) =>
                 standings.map((s) => (
                   <tr
                     key={s.club_id}
-                    className={`transition hover:bg-zinc-800/40 ${
-                      s.position === 1 ? 'bg-amber-950/10' : ''
+                    className={`transition hover:bg-zinc-50/80 ${
+                      s.position === 1 ? 'bg-amber-50/40' : ''
                     }`}
                   >
                     <td className="py-3 px-4 text-center">
                       {getPositionBadge(s.position)}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-zinc-100">
+                    <td className="py-3 px-4 font-semibold text-zinc-900">
                       {s.club_name}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-zinc-300">
+                    <td className="py-3 px-3 text-center font-mono text-zinc-700">
                       {s.played}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-emerald-400 font-semibold">
+                    <td className="py-3 px-3 text-center font-mono text-emerald-600 font-semibold">
                       {s.wins}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-zinc-400">
+                    <td className="py-3 px-3 text-center font-mono text-[#686872]">
                       {s.draws}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-rose-400">
+                    <td className="py-3 px-3 text-center font-mono text-rose-600">
                       {s.losses}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-zinc-300">
+                    <td className="py-3 px-3 text-center font-mono text-zinc-700">
                       {s.goals_for}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-zinc-300">
+                    <td className="py-3 px-3 text-center font-mono text-zinc-700">
                       {s.goals_against}
                     </td>
                     <td className="py-3 px-3 text-center font-mono font-medium">
-                      <span className={s.goal_difference > 0 ? 'text-emerald-400' : s.goal_difference < 0 ? 'text-rose-400' : 'text-zinc-400'}>
+                      <span className={s.goal_difference > 0 ? 'text-emerald-600 font-semibold' : s.goal_difference < 0 ? 'text-[#9F0A0A] font-semibold' : 'text-[#686872]'}>
                         {s.goal_difference > 0 ? `+${s.goal_difference}` : s.goal_difference}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center font-mono font-black text-blue-400 text-base bg-zinc-950/30">
+                    <td className="py-3 px-4 text-center font-mono font-black text-[#155DFC] text-base bg-[#EFF6FF]/60">
                       {s.points}
                     </td>
                   </tr>

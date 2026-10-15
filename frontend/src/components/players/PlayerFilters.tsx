@@ -62,17 +62,17 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
   };
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+    <div className="bg-white border border-[#E4E4E7] rounded-xl p-4 sm:p-5 shadow-xs space-y-4">
       {/* Search and Primary Quick Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#686872] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar atletas por nome..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition"
+            className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg pl-10 pr-4 py-2.5 text-sm text-zinc-900 placeholder-[#686872] focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
           />
         </div>
 
@@ -80,10 +80,10 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition ${
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg border text-xs font-medium transition ${
               isExpanded || filters.min_age || filters.max_age || filters.min_value || filters.max_value || filters.club_id
-                ? 'bg-blue-600/10 border-blue-500/40 text-blue-400'
-                : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+                ? 'bg-[#EFF6FF] border-blue-200 text-[#1447E6]'
+                : 'bg-white border-[#E4E4E7] text-[#686872] hover:text-zinc-900 hover:bg-zinc-50 shadow-2xs'
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -94,7 +94,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
             type="button"
             onClick={onReset}
             title="Limpar todos os filtros"
-            className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="p-2.5 rounded-lg border border-[#E4E4E7] bg-white text-[#686872] hover:text-zinc-900 hover:bg-zinc-50 transition shadow-2xs"
             aria-label="Limpar filtros"
           >
             <RotateCcw className="w-4 h-4" />
@@ -103,15 +103,15 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
       </div>
 
       {/* Basic Filter Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 border-t border-zinc-800/60">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-[#E4E4E7]">
         <div>
-          <label className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-[#686872] uppercase tracking-wider mb-1">
             Posição
           </label>
           <select
             value={filters.position}
             onChange={(e) => onChange({ ...filters, position: e.target.value })}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+            className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-2 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
           >
             <option value="">Todas</option>
             <option value="GOL">Goleiro (GOL)</option>
@@ -123,13 +123,13 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
         </div>
 
         <div>
-          <label className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-[#686872] uppercase tracking-wider mb-1">
             Condição
           </label>
           <select
             value={filters.condition}
             onChange={(e) => onChange({ ...filters, condition: e.target.value })}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+            className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-2 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
           >
             <option value="">Todas</option>
             <option value="APTO">Apto</option>
@@ -139,13 +139,13 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
         </div>
 
         <div>
-          <label className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1">
+          <label className="block text-[11px] font-semibold text-[#686872] uppercase tracking-wider mb-1">
             Ordenação
           </label>
           <select
             value={filters.sort}
             onChange={(e) => onChange({ ...filters, sort: e.target.value })}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+            className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-2 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
           >
             <option value="name">Nome (A-Z)</option>
             <option value="value_desc">Maior Valor de Mercado</option>
@@ -160,8 +160,8 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
           <label
             className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer select-none transition ${
               filters.free
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-medium'
-                : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+                ? 'bg-[#F0FDF4] border-[#B9F8CF] text-[#016630] font-semibold'
+                : 'bg-white border-[#E4E4E7] text-[#686872] hover:text-zinc-900 shadow-2xs'
             } ${filters.club_id ? 'opacity-40 cursor-not-allowed' : ''}`}
           >
             <input
@@ -169,7 +169,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
               checked={filters.free}
               disabled={Boolean(filters.club_id)}
               onChange={(e) => handleFreeToggle(e.target.checked)}
-              className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-0"
+              className="rounded border-[#E4E4E7] text-emerald-600 focus:ring-0"
             />
             Apenas Livres
           </label>
@@ -178,9 +178,9 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
 
       {/* Advanced Filter Collapse */}
       {isExpanded && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-zinc-800/60 animate-in fade-in duration-200">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-[#E4E4E7] animate-in fade-in duration-200">
           <div>
-            <label htmlFor="club-filter-select" className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1">
+            <label htmlFor="club-filter-select" className="block text-[11px] font-semibold text-[#686872] uppercase tracking-wider mb-1">
               Clube
             </label>
             <select
@@ -188,7 +188,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
               value={filters.club_id}
               disabled={filters.free}
               onChange={(e) => handleClubChange(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-2 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white disabled:opacity-40"
             >
               <option value="">Todos os Clubes</option>
               {clubs.map((c) => (
@@ -200,7 +200,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-semibold text-[#686872] uppercase tracking-wider mb-1">
               Faixa de Idade
             </label>
             <div className="flex items-center gap-2">
@@ -211,9 +211,9 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
                 max="45"
                 value={filters.min_age}
                 onChange={(e) => onChange({ ...filters, min_age: e.target.value })}
-                className="w-1/2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+                className="w-1/2 bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
               />
-              <span className="text-zinc-500 text-xs">-</span>
+              <span className="text-[#686872] text-xs">-</span>
               <input
                 type="number"
                 placeholder="Máx"
@@ -221,13 +221,13 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
                 max="45"
                 value={filters.max_age}
                 onChange={(e) => onChange({ ...filters, max_age: e.target.value })}
-                className="w-1/2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+                className="w-1/2 bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-semibold text-[#686872] uppercase tracking-wider mb-1">
               Faixa de Valor (R$)
             </label>
             <div className="flex items-center gap-2">
@@ -238,9 +238,9 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
                 min="0"
                 value={filters.min_value}
                 onChange={(e) => onChange({ ...filters, min_value: e.target.value })}
-                className="w-1/2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+                className="w-1/2 bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
               />
-              <span className="text-zinc-500 text-xs">-</span>
+              <span className="text-[#686872] text-xs">-</span>
               <input
                 type="number"
                 placeholder="Máx"
@@ -248,7 +248,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
                 min="0"
                 value={filters.max_value}
                 onChange={(e) => onChange({ ...filters, max_value: e.target.value })}
-                className="w-1/2 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+                className="w-1/2 bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
               />
             </div>
           </div>

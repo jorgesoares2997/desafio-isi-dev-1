@@ -93,8 +93,8 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
         {/* Basic Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Nome Completo <span className="text-rose-400">*</span>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1">
+              Nome Completo <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -102,19 +102,19 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
               placeholder="Ex: Carlos Alberto Silva"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 placeholder-[#686872] focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
             />
-            <p className="text-[11px] text-zinc-500 mt-1">Mínimo 2 palavras, 3 a 100 caracteres e sem números.</p>
+            <p className="text-[11px] text-[#686872] mt-1">Mínimo 2 palavras, 3 a 100 caracteres e sem números.</p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Posição <span className="text-rose-400">*</span>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1">
+              Posição <span className="text-rose-500">*</span>
             </label>
             <select
               value={position}
               onChange={(e) => setPosition(e.target.value as PlayerPosition)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
             >
               <option value="GOL">Goleiro (GOL)</option>
               <option value="ZAG">Zagueiro (ZAG)</option>
@@ -125,8 +125,8 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Idade (16 a 45) <span className="text-rose-400">*</span>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1">
+              Idade (16 a 45) <span className="text-rose-500">*</span>
             </label>
             <input
               type="number"
@@ -135,13 +135,13 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
               required
               value={age}
               onChange={(e) => setAge(Number(e.target.value))}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Agilidade (1 a 100) <span className="text-rose-400">*</span>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1">
+              Agilidade (1 a 100) <span className="text-rose-500">*</span>
             </label>
             <input
               type="number"
@@ -150,18 +150,18 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
               required
               value={agility}
               onChange={(e) => setAgility(Number(e.target.value))}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
             />
             {age >= 35 && (
-              <span className="text-[11px] text-amber-400 mt-1 block">
+              <span className="text-[11px] text-amber-600 mt-1 block">
                 Atletas com 35+ anos possuem agilidade máxima de 85.
               </span>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Potencial (1 a 99) <span className="text-rose-400">*</span>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1">
+              Potencial (1 a 99) <span className="text-rose-500">*</span>
             </label>
             <input
               type="number"
@@ -170,22 +170,22 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
               required
               value={potential}
               onChange={(e) => setPotential(Number(e.target.value))}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
             />
-            <span className="text-[11px] text-zinc-400 mt-1 block">
+            <span className="text-[11px] text-[#686872] mt-1 block">
               Mínimo: {maxAttribute} (maior atributo atual). {age >= 33 ? 'Para 33+ anos, deve ser exatamente igual ao maior atributo.' : ''}
             </span>
           </div>
         </div>
 
         {/* Technical Attributes Grid */}
-        <div className="pt-3 border-t border-zinc-800">
+        <div className="pt-3 border-t border-[#E4E4E7]">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
               Atributos Técnicos (1 a 99)
             </h4>
             <div className={`text-xs font-mono font-medium px-2.5 py-0.5 rounded-full ${
-              sumAttributes > 480 ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' : 'bg-zinc-800 text-zinc-300'
+              sumAttributes > 480 ? 'bg-[#FEF2F2] text-[#9F0A0A] border border-[#FECACA]' : 'bg-zinc-100 text-zinc-700'
             }`}>
               Soma: {sumAttributes} / 480
             </div>
@@ -193,7 +193,7 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Velocidade (Pace)</label>
+              <label className="block text-[11px] font-medium text-[#686872] mb-1">Velocidade (Pace)</label>
               <input
                 type="number"
                 min={1}
@@ -201,12 +201,12 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
                 required
                 value={pace}
                 onChange={(e) => setPace(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:border-blue-500"
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Finalização (Shooting)</label>
+              <label className="block text-[11px] font-medium text-[#686872] mb-1">Finalização (Shooting)</label>
               <input
                 type="number"
                 min={1}
@@ -214,12 +214,12 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
                 required
                 value={shooting}
                 onChange={(e) => setShooting(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:border-blue-500"
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Passe (Passing)</label>
+              <label className="block text-[11px] font-medium text-[#686872] mb-1">Passe (Passing)</label>
               <input
                 type="number"
                 min={1}
@@ -227,12 +227,12 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
                 required
                 value={passing}
                 onChange={(e) => setPassing(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:border-blue-500"
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Drible (Dribbling)</label>
+              <label className="block text-[11px] font-medium text-[#686872] mb-1">Drible (Dribbling)</label>
               <input
                 type="number"
                 min={1}
@@ -240,12 +240,12 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
                 required
                 value={dribbling}
                 onChange={(e) => setDribbling(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:border-blue-500"
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Defesa (Defending)</label>
+              <label className="block text-[11px] font-medium text-[#686872] mb-1">Defesa (Defending)</label>
               <input
                 type="number"
                 min={1}
@@ -253,12 +253,12 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
                 required
                 value={defending}
                 onChange={(e) => setDefending(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:border-blue-500"
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Físico (Physical)</label>
+              <label className="block text-[11px] font-medium text-[#686872] mb-1">Físico (Physical)</label>
               <input
                 type="number"
                 min={1}
@@ -266,25 +266,25 @@ export const PlayerCreateModal: React.FC<PlayerCreateModalProps> = ({
                 required
                 value={physical}
                 onChange={(e) => setPhysical(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:border-blue-500"
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
               />
             </div>
           </div>
         </div>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E4E4E7]">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="px-4 py-2 rounded-lg text-xs font-semibold text-[#686872] hover:text-zinc-900 hover:bg-zinc-100 transition"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading || sumAttributes > 480}
-            className="px-5 py-2.5 rounded-xl text-xs font-medium bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-lg shadow-blue-500/20 active:scale-95 transition"
+            className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-[#155DFC] hover:bg-[#1447E6] disabled:opacity-50 disabled:cursor-not-allowed text-white shadow-xs active:scale-95 transition"
           >
             {loading ? 'Cadastrando...' : 'Cadastrar Atleta'}
           </button>

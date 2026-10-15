@@ -64,15 +64,15 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-zinc-300 mb-2">
+          <label className="block text-xs font-semibold text-zinc-700 mb-2">
             Selecione a Nova Condição
           </label>
           <div className="grid grid-cols-1 gap-2.5">
             <label
               className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
                 condition === 'APTO'
-                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
-                  : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-800/60'
+                  ? 'bg-[#F0FDF4] border-[#B9F8CF] text-[#016630]'
+                  : 'bg-white border-[#E4E4E7] text-zinc-800 hover:bg-zinc-50'
               } ${isCurrentDoente ? 'opacity-40 cursor-not-allowed' : ''}`}
             >
               <input
@@ -86,11 +86,11 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
               />
               <div>
                 <span className="font-semibold text-sm block">Apto</span>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-[#686872]">
                   Sem penalidades. Valor de mercado pleno (100%).
                 </span>
                 {isCurrentDoente && (
-                  <span className="text-[11px] text-rose-400 block mt-1">
+                  <span className="text-[11px] text-[#9F0A0A] font-medium block mt-1">
                     Bloqueado: Atleta doente deve transitar antes para Mal Condicionado.
                   </span>
                 )}
@@ -100,8 +100,8 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
             <label
               className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
                 condition === 'MAL_CONDICIONADO'
-                  ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
-                  : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-800/60'
+                  ? 'bg-[#FFFBEB] border-[#FEE685] text-[#953D00]'
+                  : 'bg-white border-[#E4E4E7] text-zinc-800 hover:bg-zinc-50'
               }`}
             >
               <input
@@ -114,7 +114,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
               />
               <div>
                 <span className="font-semibold text-sm block">Mal Condicionado</span>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-[#686872]">
                   Desconto de 15% no valor de mercado e redução de 15% nos duelos da partida.
                 </span>
               </div>
@@ -123,8 +123,8 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
             <label
               className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
                 condition === 'DOENTE'
-                  ? 'bg-rose-500/10 border-rose-500/40 text-rose-300'
-                  : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-800/60'
+                  ? 'bg-[#FEF2F2] border-[#FECACA] text-[#9F0A0A]'
+                  : 'bg-white border-[#E4E4E7] text-zinc-800 hover:bg-zinc-50'
               }`}
             >
               <input
@@ -137,7 +137,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
               />
               <div>
                 <span className="font-semibold text-sm block">Doente</span>
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-[#686872]">
                   Desconto de 30% no valor de mercado. Inapto para escalações e partidas.
                 </span>
               </div>
@@ -146,7 +146,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
         </div>
 
         {condition === 'DOENTE' && (
-          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#FFFBEB] border border-[#FEE685] text-[#953D00] text-xs">
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               <strong>Atenção (RN19):</strong> Caso este atleta seja titular em algum clube, ele será imediatamente desvinculado da escalação ativa.
@@ -154,18 +154,18 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E4E4E7]">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="px-4 py-2 rounded-lg text-xs font-semibold text-[#686872] hover:text-zinc-900 hover:bg-zinc-100 transition"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2.5 rounded-xl text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 active:scale-95 transition"
+            className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-[#155DFC] hover:bg-[#1447E6] text-white shadow-xs active:scale-95 transition"
           >
             {loading ? 'Atualizando...' : 'Confirmar Condição'}
           </button>

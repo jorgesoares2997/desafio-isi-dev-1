@@ -33,30 +33,30 @@ export function formatDateTime(isoString: string | undefined | null): string {
 export function getPositionBadgeClass(position: PlayerPosition | string): string {
   switch (position) {
     case 'GOL':
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      return 'bg-amber-50 text-amber-800 dark:text-amber-400 border border-amber-200';
     case 'ZAG':
-      return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+      return 'bg-blue-50 text-blue-800 dark:text-blue-400 border border-blue-200';
     case 'LAT':
-      return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+      return 'bg-cyan-50 text-cyan-800 dark:text-cyan-400 border border-cyan-200';
     case 'MEI':
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      return 'bg-emerald-50 text-emerald-800 dark:text-emerald-400 border border-emerald-200';
     case 'ATA':
-      return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      return 'bg-rose-50 text-rose-800 dark:text-rose-400 border border-rose-200';
     default:
-      return 'bg-zinc-800 text-zinc-300 border-zinc-700';
+      return 'bg-zinc-100 text-zinc-700 border border-zinc-200';
   }
 }
 
 export function getConditionBadgeClass(condition: PlayerCondition | string): string {
   switch (condition) {
     case 'APTO':
-      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      return 'bg-emerald-50 text-emerald-800 dark:text-emerald-400 border border-emerald-200';
     case 'MAL_CONDICIONADO':
-      return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      return 'bg-amber-50 text-amber-800 dark:text-amber-400 border border-amber-200';
     case 'DOENTE':
-      return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+      return 'bg-rose-50 text-rose-800 dark:text-rose-400 border border-rose-200';
     default:
-      return 'bg-zinc-800 text-zinc-300 border-zinc-700';
+      return 'bg-zinc-100 text-zinc-700 border border-zinc-200';
   }
 }
 
