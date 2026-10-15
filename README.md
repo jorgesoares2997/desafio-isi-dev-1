@@ -110,19 +110,39 @@ docker compose down
 
 ---
 
-## 5. Testes Automatizados (Critério B5)
+## 5. Testes Automatizados e Qualidade de Código (Critério B5)
 
-Os testes automatizados foram construídos com JUnit 5, AssertJ e MockMvc, terminam de forma autônoma sem modo observação (watch) e cobrem o cálculo do valor de mercado das regras **RN02 a RN05**:
+A plataforma conta com uma suíte abrangente de **96 testes automatizados** utilizando **JUnit 5**, **AssertJ** e **MockMvc**, executados de forma 100% autônoma (sem modo watch) e sem qualquer falha:
 
 ```bash
 cd backend
 ./mvnw clean test
 ```
 
-### Casos de Teste Validados:
-- **RN02 a RN05 (Cálculo do Valor de Mercado):** Teste exato de todos os 10 cenários da tabela oficial do regulamento, cobrindo descontos por condição (`APTO`, `MAL_CONDICIONADO`, `DOENTE`), bônus/penalidades de agilidade (RN03), ajuste de idade (RN04), teto de desconto de `-40%` e piso mínimo de `1,00`.
-- **Formatação de Datas:** Validação da saída com offset de Brasília `yyyy-MM-dd'T'HH:mm:ss-03:00`.
-- **Tratamento de Exceções:** Validação de que 400, 404 e 409 retornam estritamente o JSON `{ "message": "..." }`.
+### Cobertura do Core de Negócio:
+1. **Valuation & Overall (RN02 a RN06):**
+   - Teste unitário exato de todos os 10 cenários da tabela oficial do edital para cálculo de valor de mercado (`APTO`, `MAL_CONDICIONADO`, `DOENTE`, bônus/penalidades de agilidade e idade, teto de desconto de `-40%` e piso de `1,00`).
+   - Média ponderada posicional dos 6 atributos técnicos e cálculo do valor base.
+2. **Ciclo Completo de Mercado e Transferências (RN13, RN15, RN16):**
+   - Taxa de transferência de 5% sobre valores > 30,00 e bloqueio em custos > 50% do caixa disponível.
+   - Multa rescisória de fidelidade com teto de 10,00 e comissão progressiva sobre o lucro na venda.
+   - Desvinculação imediata do jogador da escalação ao ser vendido ou ao ter condição física alterada para `DOENTE` (RN19).
+   - Bloqueio de recompra de atleta vendido anteriormente pelo mesmo clube.
+3. **Simulação Oficial de Partidas (RN20) e Classificação (RN21):**
+   - Execução da partida de referência do edital (**Águias FC 1 x 2 Delta FC**) com verificação exata dos 6 duelos táticos e penalidade de 15% para jogador `MAL_CONDICIONADO`.
+   - Recusa com HTTP `409 Conflict` quando um clube tentar disputar partida com escalação incompleta.
+   - Classificação dinâmica em `GET /api/v1/standings` ordenada por pontos (V=3, E=1, D=0), saldo de gols, gols pró e desempate alfabético Unicode NFD.
+
+### Verificação de Lint e Formatação de Código (Spotless):
+O projeto conta com o plugin **Spotless** configurado no `pom.xml` para garantia de estilo de código:
+
+```bash
+# Validar conformidade sem alterar arquivos
+mvn spotless:check
+
+# Aplicar formatação automaticamente quando necessário
+mvn spotless:apply
+```
 
 ---
 
@@ -176,13 +196,17 @@ Implementado em `GlobalExceptionHandler.java` com `@RestControllerAdvice`:
 - `404 Not Found`: Entidades não encontradas ou excluídas logicamente (`excluido_em IS NOT NULL`).
 - `409 Conflict`: Conflitos de regra de negócio (saldo insuficiente, limite de elenco, jogador não livre, recompra proibida) e integridade de chave única.
 
-### 7.4 Registro de Logs
-- Implementado em `RequestLoggingFilter.java` utilizando a biblioteca SLF4J / Logback nativa do Spring Boot.
-- Registra para cada requisição: data/hora no horário de Brasília, método HTTP, URI de destino e status code HTTP, além do tempo decorrido em milissegundos.
+### 7.4 Registro de Logs Estruturados (SLF4J / Logback)
+- Implementado em `RequestLoggingFilter.java` através de `OncePerRequestFilter`.
+- Utiliza a biblioteca SLF4J / Logback nativa do ecossistema Spring Boot.
+- Registra para cada requisição: data/hora no fuso de Brasília, método HTTP, caminho completo (URI com query params), status code HTTP e tempo de resposta em milissegundos.
 
 ### 7.5 Documentação Interativa OpenAPI / Swagger
-- Integrado via `springdoc-openapi-starter-webmvc-ui` (v2.6.0).
-- UI interativa disponível em `http://localhost:8080/api/v1/swagger-ui.html`.
+- Integrado via `springdoc-openapi-starter-webmvc-ui` (v2.6.0) com metadados configurados em `OpenApiConfig.java`.
+- Documentação interativa disponível diretamente em:
+  - `http://localhost:8080/swagger-ui.html` (e `/api/v1/swagger-ui.html`)
+  - `http://localhost:8080/v3/api-docs` (e `/api/v1/v3/api-docs`)
+- Todos os endpoints e DTOs estão anotados com tags, resumos, descrições detalhadas e esquemas de erros padronizados.
 
 ### 7.6 Inspeção de Design via Figma MCP
 - Integrado com o projeto Figma oficial (`oevjrS0eaqL3VHSvKYB8GS`).
