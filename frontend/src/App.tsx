@@ -69,160 +69,156 @@ function MainApp() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 flex flex-col font-sans selection:bg-[#155DFC] selection:text-white">
-      {/* Top Header */}
-      <header className="border-b border-[#E4E4E7] bg-white/95 backdrop-blur sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('home')}>
-            <div className="w-9 h-9 rounded-xl bg-[#155DFC] flex items-center justify-center font-black text-white shadow-md shadow-blue-500/20 text-lg tracking-tight">
-              P
+      {/* Top Header - Oculto na tela de onboarding */}
+      {activeTab !== 'home' && (
+        <header className="border-b border-[#E4E4E7] bg-white/95 backdrop-blur sticky top-0 z-40 shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            {/* Logo & Brand */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('home')}>
+              <img 
+                src="/logo.png" 
+                alt="Passe Logo" 
+                className="w-9 h-9 rounded-xl object-contain shadow-md shadow-blue-500/20" 
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold tracking-tight text-lg text-zinc-900">Passe</span>
+                  <span className="text-[10px] font-mono font-semibold text-[#155DFC] bg-[#EFF6FF] border border-blue-200 px-1.5 py-0.5 rounded">
+                    F5
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#686872] leading-none hidden sm:block">
+                  Gestão &amp; Simulação de Futebol
+                </p>
+              </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold tracking-tight text-lg text-zinc-900">Passe</span>
-                <span className="text-[10px] font-mono font-semibold text-[#155DFC] bg-[#EFF6FF] border border-blue-200 px-1.5 py-0.5 rounded">
-                  F5
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-xl border border-[#E4E4E7]">
+              <button
+                onClick={() => handleTabChange('home')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60 transition"
+              >
+                <Home className="w-4 h-4" />
+                Início
+              </button>
+
+              <button
+                onClick={() => handleTabChange('players')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                  activeTab === 'players'
+                    ? 'bg-[#155DFC] text-white shadow-xs'
+                    : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                Jogadores
+              </button>
+
+              <button
+                onClick={() => handleTabChange('clubs')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                  activeTab === 'clubs'
+                    ? 'bg-[#155DFC] text-white shadow-xs'
+                    : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
+                }`}
+              >
+                <Shield className="w-4 h-4" />
+                Clubes
+              </button>
+
+              <button
+                onClick={() => handleTabChange('league')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                  activeTab === 'league'
+                    ? 'bg-[#155DFC] text-white shadow-xs'
+                    : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
+                }`}
+              >
+                <Trophy className="w-4 h-4" />
+                Liga &amp; Simulação
+              </button>
+            </nav>
+
+            {/* Right Status & Mobile Toggle */}
+            <div className="flex items-center gap-3">
+              {/* Status da Conexão */}
+              <div className="flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-white border border-[#E4E4E7] shadow-2xs">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    apiOnline === true
+                      ? 'bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50'
+                      : apiOnline === false
+                      ? 'bg-rose-500'
+                      : 'bg-amber-500'
+                  }`}
+                />
+                <span className="text-[#686872] font-mono text-[11px] hidden sm:inline">
+                  API {apiOnline === true ? 'Online' : apiOnline === false ? 'Offline' : 'Verificando'}
                 </span>
               </div>
-              <p className="text-[11px] text-[#686872] leading-none hidden sm:block">
-                Gestão &amp; Simulação de Futebol
-              </p>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg bg-white text-zinc-600 hover:text-zinc-900 border border-[#E4E4E7] transition shadow-2xs"
+                aria-label="Abrir menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-xl border border-[#E4E4E7]">
-            <button
-              onClick={() => handleTabChange('home')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'home'
-                  ? 'bg-[#155DFC] text-white shadow-xs'
-                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              Início
-            </button>
-
-            <button
-              onClick={() => handleTabChange('players')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'players'
-                  ? 'bg-[#155DFC] text-white shadow-xs'
-                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              Jogadores
-            </button>
-
-            <button
-              onClick={() => handleTabChange('clubs')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'clubs'
-                  ? 'bg-[#155DFC] text-white shadow-xs'
-                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              Clubes
-            </button>
-
-            <button
-              onClick={() => handleTabChange('league')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === 'league'
-                  ? 'bg-[#155DFC] text-white shadow-xs'
-                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
-              }`}
-            >
-              <Trophy className="w-4 h-4" />
-              Liga &amp; Simulação
-            </button>
-          </nav>
-
-          {/* Right Status & Mobile Toggle */}
-          <div className="flex items-center gap-3">
-            {/* Status da Conexão */}
-            <div className="flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-white border border-[#E4E4E7] shadow-2xs">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  apiOnline === true
-                    ? 'bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50'
-                    : apiOnline === false
-                    ? 'bg-rose-500'
-                    : 'bg-amber-500'
+          {/* Mobile Dropdown Menu (375px responsive support) */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-[#E4E4E7] bg-white px-4 py-3 space-y-1 shadow-md animate-in slide-in-from-top duration-200">
+              <button
+                onClick={() => handleTabChange('home')}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-[#686872] hover:bg-zinc-100 hover:text-zinc-900 transition"
+              >
+                <Home className="w-4 h-4" />
+                Início
+              </button>
+              <button
+                onClick={() => handleTabChange('players')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
+                  activeTab === 'players'
+                    ? 'bg-[#155DFC] text-white'
+                    : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
                 }`}
-              />
-              <span className="text-[#686872] font-mono text-[11px] hidden sm:inline">
-                API {apiOnline === true ? 'Online' : apiOnline === false ? 'Offline' : 'Verificando'}
-              </span>
+              >
+                <Users className="w-4 h-4" />
+                Jogadores
+              </button>
+              <button
+                onClick={() => handleTabChange('clubs')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
+                  activeTab === 'clubs'
+                    ? 'bg-[#155DFC] text-white'
+                    : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
+                }`}
+              >
+                <Shield className="w-4 h-4" />
+                Clubes
+              </button>
+              <button
+                onClick={() => handleTabChange('league')}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
+                  activeTab === 'league'
+                    ? 'bg-[#155DFC] text-white'
+                    : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
+                }`}
+              >
+                <Trophy className="w-4 h-4" />
+                Liga &amp; Simulação
+              </button>
             </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-white text-zinc-600 hover:text-zinc-900 border border-[#E4E4E7] transition shadow-2xs"
-              aria-label="Abrir menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Dropdown Menu (375px responsive support) */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[#E4E4E7] bg-white px-4 py-3 space-y-1 shadow-md animate-in slide-in-from-top duration-200">
-            <button
-              onClick={() => handleTabChange('home')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'home'
-                  ? 'bg-[#155DFC] text-white'
-                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              Início
-            </button>
-            <button
-              onClick={() => handleTabChange('players')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'players'
-                  ? 'bg-[#155DFC] text-white'
-                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              Jogadores
-            </button>
-            <button
-              onClick={() => handleTabChange('clubs')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'clubs'
-                  ? 'bg-[#155DFC] text-white'
-                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              Clubes
-            </button>
-            <button
-              onClick={() => handleTabChange('league')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                activeTab === 'league'
-                  ? 'bg-[#155DFC] text-white'
-                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
-              }`}
-            >
-              <Trophy className="w-4 h-4" />
-              Liga &amp; Simulação
-            </button>
-          </div>
-        )}
-      </header>
+          )}
+        </header>
+      )}
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full">
+      <main className={activeTab === 'home' ? 'w-full flex-1 flex flex-col justify-center' : 'max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full'}>
         {/* Renderização Condicional de Módulos */}
         {activeTab === 'home' && (
           <HomeScreen
@@ -262,10 +258,12 @@ function MainApp() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[#E4E4E7] bg-white py-4 text-center text-xs text-[#686872] font-mono">
-        <p>Passe - SENAI/PE · FASE 5 Frontend React + TypeScript + Tailwind CSS</p>
-      </footer>
+      {/* Footer - Oculto na tela de onboarding */}
+      {activeTab !== 'home' && (
+        <footer className="border-t border-[#E4E4E7] bg-white py-4 text-center text-xs text-[#686872] font-mono">
+          <p>Passe - SENAI/PE · FASE 5 Frontend React + TypeScript + Tailwind CSS</p>
+        </footer>
+      )}
     </div>
   );
 }
