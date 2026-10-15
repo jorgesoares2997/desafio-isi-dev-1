@@ -68,7 +68,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 flex flex-col font-sans selection:bg-[#155DFC] selection:text-white">
+    <div className={`min-h-screen ${activeTab === 'home' ? 'bg-white' : 'bg-[#FAFAFA]'} text-zinc-900 flex flex-col font-sans selection:bg-[#155DFC] selection:text-white`}>
       {/* Top Header - Oculto na tela de onboarding */}
       {activeTab !== 'home' && (
         <header className="border-b border-[#E4E4E7] bg-white/95 backdrop-blur sticky top-0 z-40 shadow-xs">
