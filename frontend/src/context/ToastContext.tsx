@@ -35,26 +35,26 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-2xl border backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 duration-300 ${
+            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-lg border backdrop-blur-md transition-all animate-in slide-in-from-bottom-5 duration-300 bg-white ${
               toast.type === 'success'
-                ? 'bg-zinc-900/95 border-emerald-500/40 text-emerald-300'
+                ? 'border-emerald-200 text-zinc-900 shadow-emerald-500/5'
                 : toast.type === 'error'
-                ? 'bg-zinc-900/95 border-rose-500/40 text-rose-300'
-                : 'bg-zinc-900/95 border-blue-500/40 text-blue-300'
+                ? 'border-rose-200 text-zinc-900 shadow-rose-500/5'
+                : 'border-blue-200 text-zinc-900 shadow-blue-500/5'
             }`}
             role="alert"
           >
-            {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />}
-            {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />}
-            {toast.type === 'info' && <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />}
+            {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />}
+            {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
+            {toast.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />}
             
-            <div className="flex-1 text-sm leading-relaxed text-zinc-100 font-medium">
+            <div className="flex-1 text-sm leading-relaxed text-zinc-900 font-medium">
               {toast.message}
             </div>
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-zinc-400 hover:text-white transition p-0.5 rounded-md hover:bg-zinc-800"
+              className="text-zinc-400 hover:text-zinc-700 transition p-0.5 rounded-md hover:bg-zinc-100"
               aria-label="Fechar notificação"
             >
               <X className="w-4 h-4" />

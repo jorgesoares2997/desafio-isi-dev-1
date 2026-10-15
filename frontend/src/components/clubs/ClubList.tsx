@@ -43,11 +43,11 @@ export const ClubList: React.FC<ClubListProps> = ({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Shield className="w-6 h-6 text-blue-500" />
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 flex items-center gap-2.5">
+            <Shield className="w-6 h-6 text-[#155DFC]" />
             Clubes e Finanças
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#686872] mt-1">
             Gestão patrimonial, saldo em caixa (RN10) e elencos da liga.
           </p>
         </div>
@@ -56,7 +56,7 @@ export const ClubList: React.FC<ClubListProps> = ({
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value as 'name' | 'net_worth_desc' | 'net_worth_asc')}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+            className="bg-[#FAFAFA] border border-[#E4E4E7] rounded-lg px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-[#155DFC] focus:bg-white"
           >
             <option value="name">Ordenar por Nome (A-Z)</option>
             <option value="net_worth_desc">Maior Patrimônio Líquido</option>
@@ -65,7 +65,7 @@ export const ClubList: React.FC<ClubListProps> = ({
 
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-blue-500/20 transition cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-2 bg-[#155DFC] hover:bg-[#1447E6] active:scale-95 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             Novo Clube
@@ -77,14 +77,14 @@ export const ClubList: React.FC<ClubListProps> = ({
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4 animate-pulse">
+            <div key={i} className="bg-white border border-[#E4E4E7] rounded-xl p-5 space-y-4 animate-pulse shadow-xs">
               <div className="flex justify-between items-center">
-                <div className="h-5 bg-zinc-800 rounded w-1/2" />
-                <div className="h-6 w-12 bg-zinc-800 rounded-lg" />
+                <div className="h-5 bg-zinc-200 rounded w-1/2" />
+                <div className="h-6 w-12 bg-zinc-200 rounded-lg" />
               </div>
               <div className="space-y-2">
-                <div className="h-4 bg-zinc-800/60 rounded w-3/4" />
-                <div className="h-4 bg-zinc-800/60 rounded w-1/2" />
+                <div className="h-4 bg-zinc-100 rounded w-3/4" />
+                <div className="h-4 bg-zinc-100 rounded w-1/2" />
               </div>
             </div>
           ))}
@@ -104,60 +104,60 @@ export const ClubList: React.FC<ClubListProps> = ({
             <div
               key={club.id}
               onClick={() => onSelectClub(club.id)}
-              className="bg-zinc-900/90 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700/80 rounded-2xl p-5 shadow-xl transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+              className="bg-white hover:bg-zinc-50/80 border border-[#E4E4E7] hover:border-zinc-300 rounded-xl p-5 shadow-xs transition-all duration-200 cursor-pointer group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/10">
+                    <div className="w-10 h-10 rounded-xl bg-[#155DFC] flex items-center justify-center font-bold text-white shadow-2xs">
                       {club.acronym}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white group-hover:text-blue-400 transition tracking-tight">
+                      <h3 className="font-semibold text-zinc-900 group-hover:text-[#155DFC] transition tracking-tight">
                         {club.name}
                       </h3>
-                      <span className="text-[11px] font-mono text-zinc-400">
+                      <span className="text-[11px] font-mono text-[#686872]">
                         ID: {club.id}
                       </span>
                     </div>
                   </div>
 
-                  <span className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-xs font-mono font-bold text-blue-400">
+                  <span className="px-2 py-0.5 rounded-md bg-[#EFF6FF] border border-blue-200 text-xs font-mono font-bold text-[#1447E6]">
                     {club.acronym}
                   </span>
                 </div>
 
-                <div className="space-y-2 pt-3 border-t border-zinc-800/60 text-xs">
-                  <div className="flex justify-between items-center text-zinc-400">
+                <div className="space-y-2 pt-3 border-t border-[#E4E4E7] text-xs">
+                  <div className="flex justify-between items-center text-[#686872]">
                     <span className="flex items-center gap-1.5">
-                      <Wallet className="w-3.5 h-3.5 text-zinc-500" /> Caixa Atual:
+                      <Wallet className="w-3.5 h-3.5 text-zinc-400" /> Caixa Atual:
                     </span>
-                    <span className="font-mono text-zinc-200 font-medium">
+                    <span className="font-mono text-zinc-800 font-semibold">
                       {formatCurrency(club.cash)}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center text-zinc-400">
+                  <div className="flex justify-between items-center text-[#686872]">
                     <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-zinc-500" /> Valor do Elenco:
+                      <Users className="w-3.5 h-3.5 text-zinc-400" /> Valor do Elenco:
                     </span>
-                    <span className="font-mono text-zinc-200 font-medium">
+                    <span className="font-mono text-zinc-800 font-semibold">
                       {formatCurrency(club.squad_value)}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center text-zinc-200 pt-2 border-t border-zinc-800/40 font-semibold">
-                    <span className="flex items-center gap-1.5 text-emerald-400">
-                      <TrendingUp className="w-3.5 h-3.5" /> Patrimônio Líquido:
+                  <div className="flex justify-between items-center text-zinc-900 pt-2 border-t border-[#E4E4E7] font-semibold">
+                    <span className="flex items-center gap-1.5 text-emerald-700">
+                      <TrendingUp className="w-3.5 h-3.5 text-emerald-600" /> Patrimônio Líquido:
                     </span>
-                    <span className="font-mono text-emerald-400 text-sm">
+                    <span className="font-mono text-emerald-600 font-bold text-sm">
                       {formatCurrency(club.net_worth)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-zinc-800/60 flex items-center justify-between text-xs text-blue-400 font-medium group-hover:translate-x-0.5 transition">
+              <div className="mt-4 pt-3 border-t border-[#E4E4E7] flex items-center justify-between text-xs text-[#155DFC] font-semibold group-hover:translate-x-0.5 transition">
                 <span>Ver Elenco e Transações</span>
                 <ChevronRight className="w-4 h-4" />
               </div>

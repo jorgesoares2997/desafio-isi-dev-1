@@ -66,36 +66,36 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 flex flex-col font-sans selection:bg-[#155DFC] selection:text-white">
       {/* Top Header */}
-      <header className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur sticky top-0 z-40">
+      <header className="border-b border-[#E4E4E7] bg-white/95 backdrop-blur sticky top-0 z-40 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('players')}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center font-black text-white shadow-lg shadow-blue-500/20 text-lg tracking-tight">
+            <div className="w-9 h-9 rounded-xl bg-[#155DFC] flex items-center justify-center font-black text-white shadow-md shadow-blue-500/20 text-lg tracking-tight">
               P
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold tracking-tight text-lg text-white">Passe</span>
-                <span className="text-[10px] font-mono text-blue-400 bg-blue-950/60 border border-blue-800/60 px-1.5 py-0.5 rounded">
+                <span className="font-bold tracking-tight text-lg text-zinc-900">Passe</span>
+                <span className="text-[10px] font-mono font-semibold text-[#155DFC] bg-[#EFF6FF] border border-blue-200 px-1.5 py-0.5 rounded">
                   F5
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-400 leading-none hidden sm:block">
+              <p className="text-[11px] text-[#686872] leading-none hidden sm:block">
                 Gestão &amp; Simulação de Futebol
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/80">
+          <nav className="hidden md:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-xl border border-[#E4E4E7]">
             <button
               onClick={() => handleTabChange('players')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'players'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900'
+                  ? 'bg-[#155DFC] text-white shadow-xs'
+                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
               }`}
             >
               <Users className="w-4 h-4" />
@@ -106,8 +106,8 @@ function MainApp() {
               onClick={() => handleTabChange('clubs')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'clubs'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900'
+                  ? 'bg-[#155DFC] text-white shadow-xs'
+                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
               }`}
             >
               <Shield className="w-4 h-4" />
@@ -118,8 +118,8 @@ function MainApp() {
               onClick={() => handleTabChange('league')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'league'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900'
+                  ? 'bg-[#155DFC] text-white shadow-xs'
+                  : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/60'
               }`}
             >
               <Trophy className="w-4 h-4" />
@@ -130,7 +130,7 @@ function MainApp() {
           {/* Right Status & Mobile Toggle */}
           <div className="flex items-center gap-3">
             {/* Status da Conexão */}
-            <div className="flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800">
+            <div className="flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-white border border-[#E4E4E7] shadow-2xs">
               <span
                 className={`w-2 h-2 rounded-full ${
                   apiOnline === true
@@ -140,7 +140,7 @@ function MainApp() {
                     : 'bg-amber-500'
                 }`}
               />
-              <span className="text-zinc-400 font-mono text-[11px] hidden sm:inline">
+              <span className="text-[#686872] font-mono text-[11px] hidden sm:inline">
                 API {apiOnline === true ? 'Online' : apiOnline === false ? 'Offline' : 'Verificando'}
               </span>
             </div>
@@ -148,7 +148,7 @@ function MainApp() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 transition"
+              className="md:hidden p-2 rounded-lg bg-white text-zinc-600 hover:text-zinc-900 border border-[#E4E4E7] transition shadow-2xs"
               aria-label="Abrir menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -158,13 +158,13 @@ function MainApp() {
 
         {/* Mobile Dropdown Menu (375px responsive support) */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-zinc-800 bg-zinc-900 px-4 py-3 space-y-1 animate-in slide-in-from-top duration-200">
+          <div className="md:hidden border-t border-[#E4E4E7] bg-white px-4 py-3 space-y-1 shadow-md animate-in slide-in-from-top duration-200">
             <button
               onClick={() => handleTabChange('players')}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
                 activeTab === 'players'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                  ? 'bg-[#155DFC] text-white'
+                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
               }`}
             >
               <Users className="w-4 h-4" />
@@ -174,8 +174,8 @@ function MainApp() {
               onClick={() => handleTabChange('clubs')}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
                 activeTab === 'clubs'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                  ? 'bg-[#155DFC] text-white'
+                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
               }`}
             >
               <Shield className="w-4 h-4" />
@@ -185,8 +185,8 @@ function MainApp() {
               onClick={() => handleTabChange('league')}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
                 activeTab === 'league'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                  ? 'bg-[#155DFC] text-white'
+                  : 'text-[#686872] hover:bg-zinc-100 hover:text-zinc-900'
               }`}
             >
               <Trophy className="w-4 h-4" />
@@ -228,7 +228,7 @@ function MainApp() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-900 bg-zinc-950 py-4 text-center text-xs text-zinc-500 font-mono">
+      <footer className="border-t border-[#E4E4E7] bg-white py-4 text-center text-xs text-[#686872] font-mono">
         <p>Passe - SENAI/PE · FASE 5 Frontend React + TypeScript + Tailwind CSS</p>
       </footer>
     </div>

@@ -46,22 +46,22 @@ export const PlayerDeleteModal: React.FC<PlayerDeleteModalProps> = ({
       maxWidth="sm"
     >
       <div className="space-y-4">
-        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-[#9F0A0A] text-xs">
+          <AlertCircle className="w-5 h-5 shrink-0 text-[#E40016]" />
           <div>
             Você tem certeza que deseja excluir o atleta{' '}
-            <strong className="text-white">{player.name}</strong>?
-            <p className="mt-1 text-zinc-400">
+            <strong className="text-zinc-900">{player.name}</strong>?
+            <p className="mt-1 text-[#686872]">
               Apenas atletas livres de vínculo contratual podem ser excluídos.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E4E4E7]">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            className="px-4 py-2 rounded-lg text-xs font-semibold text-[#686872] hover:text-zinc-900 hover:bg-zinc-100 transition"
           >
             Cancelar
           </button>
@@ -69,7 +69,7 @@ export const PlayerDeleteModal: React.FC<PlayerDeleteModalProps> = ({
             type="button"
             disabled={loading}
             onClick={handleDelete}
-            className="px-4 py-2 rounded-xl text-xs font-medium bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-500/20 active:scale-95 transition"
+            className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#E40016] hover:bg-rose-700 text-white shadow-xs active:scale-95 transition"
           >
             {loading ? 'Excluindo...' : 'Confirmar Exclusão'}
           </button>
