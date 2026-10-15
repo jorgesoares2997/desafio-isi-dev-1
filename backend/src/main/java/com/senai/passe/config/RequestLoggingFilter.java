@@ -32,10 +32,14 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
+            String uri = request.getRequestURI();
+            String queryString = request.getQueryString();
+            String fullPath = (queryString != null && !queryString.isBlank()) ? uri + "?" + queryString : uri;
+
             log.info("[{}] {} {} -> Status: {} ({}ms)",
                     timestamp,
                     request.getMethod(),
-                    request.getRequestURI(),
+                    fullPath,
                     response.getStatus(),
                     duration
             );
