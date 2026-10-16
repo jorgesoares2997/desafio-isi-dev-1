@@ -8,6 +8,8 @@ import { PlayerEditModal } from './PlayerEditModal';
 import { PlayerConditionModal } from './PlayerConditionModal';
 import { PlayerDeleteModal } from './PlayerDeleteModal';
 import { QuickBuyModal } from './QuickBuyModal';
+import { PlayerSuccessModal } from './PlayerSuccessModal';
+import { PlayerDetailModal } from './PlayerDetailModal';
 import { TableSkeleton } from '../common/Skeleton';
 import { EmptyState } from '../common/EmptyState';
 import { 
@@ -16,10 +18,11 @@ import {
   MoreHorizontal, 
   ShoppingCart, 
   Edit3, 
-  HeartPulse, 
+  Heart, 
   Trash2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Eye
 } from 'lucide-react';
 
 const INITIAL_FILTERS: PlayerFilterValues = {
@@ -76,6 +79,8 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   const [conditionPlayer, setConditionPlayer] = useState<Player | null>(null);
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
   const [buyingPlayer, setBuyingPlayer] = useState<Player | null>(null);
+  const [detailPlayer, setDetailPlayer] = useState<Player | null>(null);
+  const [successPlayer, setSuccessPlayer] = useState<Player | null>(null);
 
   // Popover menu state
   const [menuPlayerId, setMenuPlayerId] = useState<number | null>(null);
@@ -194,7 +199,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
     }
   };
 
-  // Footnote text logic matching Screenshots 1-4
+  // Footnote text logic matching Figma Screenshots
   const getFootnoteText = () => {
     if (filters.free) {
       return 'Com a aba "Livres" ativa, o filtro por clube fica desabilitado, porque essa combinação não é aceita.';
@@ -426,7 +431,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                         )}
                       </td>
 
-                      {/* Actions Popover Trigger */}
+                      {/* Actions Popover Trigger matching Figma Screenshot 2 */}
                       <td className="py-3.5 px-4 text-right relative">
                         <button
                           onClick={() => setMenuPlayerId(isMenuOpen ? null : player.id)}
@@ -436,51 +441,93 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
 
-                        {/* Dropdown Menu */}
+                        {/* Dropdown Menu - 100% fiel à Imagem 2 */}
                         {isMenuOpen && (
                           <div
                             ref={menuRef}
-                            className="absolute right-4 mt-1 w-48 bg-white rounded-xl shadow-lg border border-[#E4E4E7] py-1.5 z-30 text-left animate-in fade-in zoom-in-95 duration-100"
+                            className="absolute right-4 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-[#E4E4E7] py-2 z-30 text-left animate-in fade-in zoom-in-95 duration-100 select-none"
                           >
+                            {/* Nome do Jogador no topo do menu */}
+                            <div className="px-3.5 py-1.5 text-xs font-semibold text-[#686872] border-b border-[#E4E4E7]/60 truncate">
+                              {player.name}
+                            </div>
+
+                            {/* Opção 1: Ver detalhes */}
+                            <button
+                              onClick={() => {
+                                setDetailPlayer(player);
+                                setMenuPlayerId(null);
+                              }}
+                              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
+                            >
+                              <Eye className="w-4 h-4 text-zinc-500" />
+                              <span>Ver detalhes</span>
+                            </button>
+
+                            {/* Opção 2: Editar */}
                             <button
                               onClick={() => {
                                 setEditingPlayer(player);
                                 setMenuPlayerId(null);
                               }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 transition"
+                              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
                             >
-                              <Edit3 className="w-3.5 h-3.5 text-[#155DFC]" />
-                              Editar dados
+                              <Edit3 className="w-4 h-4 text-zinc-500" />
+                              <span>Editar</span>
                             </button>
 
+                            {/* Opção 3: Alterar condição */}
                             <button
                               onClick={() => {
                                 setConditionPlayer(player);
                                 setMenuPlayerId(null);
                               }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-700 hover:bg-zinc-50 transition"
+                              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
                             >
-                              <HeartPulse className="w-3.5 h-3.5 text-amber-500" />
-                              Alterar condição
+                              <Heart className="w-4 h-4 text-zinc-500" />
+                              <span>Alterar condição</span>
                             </button>
 
-                            <div className="border-t border-[#E4E4E7] my-1" />
+                            {/* Opção 4: Comprar (se o jogador estiver livre) */}
+                            {player.club_id === null && (
+                              <button
+                                onClick={() => {
+                                  setBuyingPlayer(player);
+                                  setMenuPlayerId(null);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
+                              >
+                                <ShoppingCart className="w-4 h-4 text-zinc-500" />
+                                <span>Comprar</span>
+                              </button>
+                            )}
 
+                            <div className="border-t border-[#E4E4E7]/60 my-1" />
+
+                            {/* Opção 5: Excluir com nota explicativa */}
                             <button
                               onClick={() => {
-                                setDeletingPlayer(player);
-                                setMenuPlayerId(null);
+                                if (player.club_id === null) {
+                                  setDeletingPlayer(player);
+                                  setMenuPlayerId(null);
+                                }
                               }}
                               disabled={player.club_id !== null}
-                              title={
-                                player.club_id !== null
-                                  ? 'Atleta vinculado a um clube não pode ser excluído'
-                                  : 'Excluir jogador'
-                              }
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                              className={`w-full flex flex-col items-start px-3.5 py-2 text-left transition ${
+                                player.club_id === null
+                                  ? 'hover:bg-rose-50/50 cursor-pointer text-rose-600'
+                                  : 'opacity-40 cursor-not-allowed text-zinc-400'
+                              }`}
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              Excluir jogador
+                              <div className="flex items-center gap-2.5">
+                                <Trash2 className="w-4 h-4" />
+                                <span className="text-xs font-medium">Excluir</span>
+                              </div>
+                              <span className="text-[10px] text-[#686872] mt-0.5 pl-6.5 leading-tight">
+                                {player.club_id === null
+                                  ? 'Disponível porque o jogador está livre.'
+                                  : 'Indisponível: jogador vinculado a um clube.'}
+                              </span>
                             </button>
                           </div>
                         )}
@@ -540,7 +587,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         </div>
       </div>
 
-      {/* Footnote matching Screenshots 1-4 */}
+      {/* Footnote matching Figma Screenshots */}
       <p className="text-xs text-zinc-500 px-1 leading-relaxed">
         {getFootnoteText()}
       </p>
@@ -549,10 +596,26 @@ export const PlayerList: React.FC<PlayerListProps> = ({
       <PlayerCreateModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        onSuccess={() => {
+        onSuccess={(newPlayer) => {
           fetchPlayers();
           fetchCounts();
+          setSuccessPlayer(newPlayer);
         }}
+      />
+
+      <PlayerSuccessModal
+        isOpen={Boolean(successPlayer)}
+        player={successPlayer}
+        onClose={() => setSuccessPlayer(null)}
+        onViewDetails={(p) => setDetailPlayer(p)}
+      />
+
+      <PlayerDetailModal
+        isOpen={Boolean(detailPlayer)}
+        player={detailPlayer}
+        clubs={clubs}
+        onClose={() => setDetailPlayer(null)}
+        onBuy={(p) => setBuyingPlayer(p)}
       />
 
       <PlayerEditModal
