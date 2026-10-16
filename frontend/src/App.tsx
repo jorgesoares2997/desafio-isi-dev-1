@@ -41,6 +41,7 @@ function MainApp() {
   });
 
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isClubCreateOpen, setIsClubCreateOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -147,15 +148,18 @@ function MainApp() {
         onCreateClub={() => setIsClubCreateOpen(true)}
         isOpen={sidebarMobileOpen}
         onClose={() => setSidebarMobileOpen(false)}
+        isCollapsed={isSidebarCollapsed}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
         <BreadcrumbsHeader
           activeTab={activeTab}
           selectedClubName={selectedClub?.name}
           onRefresh={handleGlobalRefresh}
           onToggleSidebar={() => setSidebarMobileOpen(true)}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleCollapseSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
           refreshing={refreshing}
         />
 

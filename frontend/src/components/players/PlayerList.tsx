@@ -9,7 +9,7 @@ import { PlayerConditionModal } from './PlayerConditionModal';
 import { PlayerDeleteModal } from './PlayerDeleteModal';
 import { QuickBuyModal } from './QuickBuyModal';
 import { PlayerSuccessModal } from './PlayerSuccessModal';
-import { PlayerDetailModal } from './PlayerDetailModal';
+import { PlayerDetailDrawer } from './PlayerDetailDrawer';
 import { TableSkeleton } from '../common/Skeleton';
 import { EmptyState } from '../common/EmptyState';
 import { 
@@ -73,7 +73,11 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   const [freeCount, setFreeCount] = useState<number | undefined>(undefined);
   const [inClubCount, setInClubCount] = useState<number | undefined>(undefined);
 
-  // Modals state
+  // Recent action indicator for contextual footnotes (Screenshots 1, 4, 5)
+  const [recentAction, setRecentAction] = useState<'condition_changed' | 'player_deleted' | null>(null);
+  const [lastDeletedPlayer, setLastDeletedPlayer] = useState<Player | null>(null);
+
+  // Modals and Drawer state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [conditionPlayer, setConditionPlayer] = useState<Player | null>(null);
@@ -157,11 +161,13 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   const handleFilterChange = (newFilters: PlayerFilterValues) => {
     setFilters(newFilters);
     setCurrentPage(1);
+    setRecentAction(null);
   };
 
   const handleResetFilters = () => {
     setFilters(INITIAL_FILTERS);
     setCurrentPage(1);
+    setRecentAction(null);
   };
 
   const getClubName = (clubId: number | null) => {
@@ -199,8 +205,17 @@ export const PlayerList: React.FC<PlayerListProps> = ({
     }
   };
 
-  // Footnote text logic matching Figma Screenshots
+  // Footnote text logic strictly matching all Figma states
   const getFootnoteText = () => {
+    if (recentAction === 'condition_changed') {
+      return 'A tela mostra o novo valor de mercado depois da alteração.';
+    }
+    if (recentAction === 'player_deleted' && lastDeletedPlayer) {
+      return `Depois da exclusão do ${lastDeletedPlayer.name} (J${lastDeletedPlayer.id}), a lista volta da API sem ele: ${totalItems} jogadores e ${freeCount ?? 0} livres. Ele continua no banco, nas transações e nas partidas antigas (RN09).`;
+    }
+    if (filters.sort && filters.sort !== 'name') {
+      return 'As 6 ordenações que a API aceita no sort: nome; valor de mercado e idade, nos dois sentidos; e posição, na ordem GOL, ZAG, LAT, MEI e ATA. Empates são desfeitos pelo nome e pelo id (RN07).';
+    }
     if (filters.free) {
       return 'Com a aba "Livres" ativa, o filtro por clube fica desabilitado, porque essa combinação não é aceita.';
     }
@@ -411,7 +426,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                             </span>
                             <button
                               onClick={() => onClubClick && onClubClick(club.id)}
-                              className="underline hover:text-[#155DFC] text-xs text-zinc-900 transition font-normal"
+                              className="underline hover:text-[#155DFC] text-xs text-zinc-900 transition font-normal cursor-pointer"
                             >
                               {club.name}
                             </button>
@@ -441,7 +456,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
 
-                        {/* Dropdown Menu - 100% fiel à Imagem 2 */}
+                        {/* Dropdown Menu - 100% fiel ao Figma */}
                         {isMenuOpen && (
                           <div
                             ref={menuRef}
@@ -587,12 +602,12 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         </div>
       </div>
 
-      {/* Footnote matching Figma Screenshots */}
+      {/* Footnote strictly matching Figma Screenshots */}
       <p className="text-xs text-zinc-500 px-1 leading-relaxed">
         {getFootnoteText()}
       </p>
 
-      {/* Modals */}
+      {/* Modals and Drawers */}
       <PlayerCreateModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -610,11 +625,13 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         onViewDetails={(p) => setDetailPlayer(p)}
       />
 
-      <PlayerDetailModal
+      <PlayerDetailDrawer
         isOpen={Boolean(detailPlayer)}
         player={detailPlayer}
         clubs={clubs}
         onClose={() => setDetailPlayer(null)}
+        onEdit={(p) => setEditingPlayer(p)}
+        onChangeCondition={(p) => setConditionPlayer(p)}
         onBuy={(p) => setBuyingPlayer(p)}
       />
 
@@ -629,16 +646,21 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         isOpen={Boolean(conditionPlayer)}
         player={conditionPlayer}
         onClose={() => setConditionPlayer(null)}
-        onSuccess={() => fetchPlayers()}
+        onSuccess={() => {
+          fetchPlayers();
+          setRecentAction('condition_changed');
+        }}
       />
 
       <PlayerDeleteModal
         isOpen={Boolean(deletingPlayer)}
         player={deletingPlayer}
         onClose={() => setDeletingPlayer(null)}
-        onSuccess={() => {
+        onSuccess={(deletedPlayer) => {
           fetchPlayers();
           fetchCounts();
+          setLastDeletedPlayer(deletedPlayer);
+          setRecentAction('player_deleted');
         }}
       />
 

@@ -23,6 +23,7 @@ interface SidebarProps {
   onCreateClub: () => void;
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -37,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCreateClub,
   isOpen,
   onClose,
+  isCollapsed = false,
 }) => {
   const sidebarContent = (
     <aside className="w-64 h-full bg-[#FAFAFA] border-r border-[#E4E4E7] flex flex-col justify-between select-none">
@@ -226,8 +228,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Desktop Persistent Sidebar */}
-      <div className="hidden lg:block shrink-0 h-screen sticky top-0">
+      {/* Desktop Persistent Sidebar with smooth collapse transition */}
+      <div 
+        className={`hidden lg:block shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden ${
+          isCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-64 opacity-100'
+        }`}
+      >
         {sidebarContent}
       </div>
 
