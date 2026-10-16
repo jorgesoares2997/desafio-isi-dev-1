@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal';
 import { api, getApiErrorMessage } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
-import { Player, PlayerCondition } from '../../types';
-import { Lock } from 'lucide-react';
+import { Player, PlayerCondition, Club, LineupResponse } from '../../types';
+import { Lock, AlertTriangle } from 'lucide-react';
 
 interface PlayerConditionModalProps {
   isOpen: boolean;
   onClose: () => void;
   player: Player | null;
+  clubs?: Club[];
   onSuccess: (updated: Player) => void;
+  onConditionSelect?: (condition: PlayerCondition, isStarter: boolean) => void;
 }
 
 const AVATAR_PALETTES = [
@@ -26,26 +28,49 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
   isOpen,
   onClose,
   player,
+  clubs = [],
   onSuccess,
+  onConditionSelect,
 }) => {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [condition, setCondition] = useState<PlayerCondition>('APTO');
+  const [isStarter, setIsStarter] = useState(false);
 
   useEffect(() => {
     if (player) {
-      // Default to next valid condition if current is DOENTE
-      if (player.condition === 'DOENTE') {
-        setCondition('MAL_CONDICIONADO');
+      const nextCond = player.condition === 'DOENTE' ? 'MAL_CONDICIONADO' : player.condition;
+      setCondition(nextCond);
+
+      // Check if player is a starter in their club's lineup
+      if (player.club_id) {
+        api.get<LineupResponse>(`/clubs/${player.club_id}/lineup`)
+          .then((res) => {
+            const starter = res.data?.players?.some((p) => p.id === player.id) ?? false;
+            setIsStarter(starter);
+            onConditionSelect?.(nextCond, starter);
+          })
+          .catch(() => {
+            setIsStarter(false);
+            onConditionSelect?.(nextCond, false);
+          });
       } else {
-        setCondition(player.condition);
+        setIsStarter(false);
+        onConditionSelect?.(nextCond, false);
       }
     }
-  }, [player]);
+  }, [player, onConditionSelect]);
+
+  const handleConditionChange = (newCond: PlayerCondition) => {
+    setCondition(newCond);
+    onConditionSelect?.(newCond, isStarter);
+  };
 
   if (!player) return null;
 
   const isCurrentDoente = player.condition === 'DOENTE';
+  const club = player.club_id ? clubs.find((c) => c.id === player.club_id) : null;
+  const clubName = club ? club.name : 'clube';
 
   const getInitials = (name: string) => {
     const parts = name.trim().split(/\s+/);
@@ -157,7 +182,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
         <div className="space-y-2.5">
           {/* Option 1: Apto */}
           <div
-            onClick={() => !isCurrentDoente && setCondition('APTO')}
+            onClick={() => !isCurrentDoente && handleConditionChange('APTO')}
             className={`flex items-start gap-3 p-3.5 rounded-2xl border transition ${
               isCurrentDoente
                 ? 'border-[#E4E4E7] bg-white text-zinc-400 opacity-60 cursor-not-allowed'
@@ -173,7 +198,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
                 value="APTO"
                 disabled={isCurrentDoente}
                 checked={condition === 'APTO'}
-                onChange={() => setCondition('APTO')}
+                onChange={() => handleConditionChange('APTO')}
                 className="w-4 h-4 text-[#155DFC] border-zinc-300 focus:ring-0 cursor-pointer"
               />
             </div>
@@ -200,7 +225,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
 
           {/* Option 2: Mal condicionado */}
           <div
-            onClick={() => setCondition('MAL_CONDICIONADO')}
+            onClick={() => handleConditionChange('MAL_CONDICIONADO')}
             className={`flex items-start gap-3 p-3.5 rounded-2xl border transition cursor-pointer ${
               condition === 'MAL_CONDICIONADO'
                 ? 'border-[#155DFC] bg-blue-50/15 shadow-2xs'
@@ -213,7 +238,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
                 name="condition"
                 value="MAL_CONDICIONADO"
                 checked={condition === 'MAL_CONDICIONADO'}
-                onChange={() => setCondition('MAL_CONDICIONADO')}
+                onChange={() => handleConditionChange('MAL_CONDICIONADO')}
                 className="w-4 h-4 text-[#155DFC] border-zinc-300 focus:ring-0 cursor-pointer"
               />
             </div>
@@ -234,7 +259,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
 
           {/* Option 3: Doente */}
           <div
-            onClick={() => setCondition('DOENTE')}
+            onClick={() => handleConditionChange('DOENTE')}
             className={`flex items-start gap-3 p-3.5 rounded-2xl border transition cursor-pointer ${
               condition === 'DOENTE'
                 ? 'border-[#155DFC] bg-blue-50/15 shadow-2xs'
@@ -247,7 +272,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
                 name="condition"
                 value="DOENTE"
                 checked={condition === 'DOENTE'}
-                onChange={() => setCondition('DOENTE')}
+                onChange={() => handleConditionChange('DOENTE')}
                 className="w-4 h-4 text-[#155DFC] border-zinc-300 focus:ring-0 cursor-pointer"
               />
             </div>
@@ -267,6 +292,21 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
           </div>
         </div>
 
+        {/* Alerta quando atleta é titular e seleciona Doente (RN19) - 100% fiel ao Figma */}
+        {isStarter && condition === 'DOENTE' && (
+          <div className="p-3.5 bg-[#FFFBEB] border border-[#FEE685] rounded-2xl flex items-start gap-2.5 text-xs animate-in fade-in duration-200">
+            <AlertTriangle className="w-4 h-4 text-[#B45309] shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold text-xs text-[#92400E]">
+                {player.name} é titular
+              </div>
+              <p className="text-[11px] text-[#B45309] mt-0.5 leading-relaxed">
+                Ao passar a Doente, ele sai da escalação, e o {clubName} só volta a jogar partidas depois de escalar de novo os 5 titulares.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Footer Actions */}
         <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E4E4E7]">
           <button
@@ -279,7 +319,7 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 rounded-xl text-xs font-semibold bg-[#155DFC] hover:bg-[#1447E6] active:scale-95 disabled:opacity-50 text-white shadow-2xs transition cursor-pointer"
+            className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-[#155DFC] hover:bg-[#1447E6] active:scale-95 disabled:opacity-50 text-white shadow-2xs transition cursor-pointer"
           >
             {loading ? 'Salvando...' : 'Salvar condição'}
           </button>
