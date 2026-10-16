@@ -105,6 +105,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
   const activeClub = clubs.find((c) => String(c.id) === String(filters.club_id));
 
   const hasActiveFilters = Boolean(
+    filters.search.trim() ||
     filters.position || 
     filters.condition || 
     filters.club_id || 
@@ -124,7 +125,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
           <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Buscar atletas por nome..."
+            placeholder="Buscar por nome"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className={`w-full bg-white border ${
@@ -245,7 +246,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
               filters.free 
                 ? 'bg-zinc-100 border-[#E4E4E7] text-zinc-400 cursor-not-allowed opacity-60' 
                 : filters.club_id
-                ? 'bg-[#EFF6FF] border-blue-200 text-[#1447E6] cursor-pointer'
+                ? 'bg-white border-[#E4E4E7] text-zinc-900 cursor-pointer shadow-2xs'
                 : 'bg-white border-[#E4E4E7] text-zinc-700 hover:bg-zinc-50 cursor-pointer'
             }`}
           >
@@ -415,33 +416,27 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
         </div>
       </div>
 
-      {/* Linha de Resultados para a busca (Screenshot 2) */}
-      {filters.search && (
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-[#686872]">Resultados para a busca:</span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 border border-[#E4E4E7] text-zinc-800 font-medium text-xs">
-            <span>Busca: {filters.search}</span>
-            <button
-              onClick={() => { setSearchInput(''); onChange({ ...filters, search: '' }); }}
-              className="text-zinc-500 hover:text-zinc-800 cursor-pointer"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </span>
-          <button
-            onClick={onReset}
-            className="text-xs text-[#155DFC] hover:underline font-medium cursor-pointer ml-1"
-          >
-            Limpar filtros
-          </button>
-        </div>
-      )}
-
-      {/* Linha de Filtros Ativos (Screenshot 3) */}
+      {/* Linha de Filtros Ativos (Screenshot 2) */}
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
           <span className="text-[#686872]">Filtros ativos:</span>
           
+          {filters.search.trim() && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 border border-[#E4E4E7] text-zinc-800 text-xs font-medium">
+              <span>Busca: {filters.search.trim()}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput('');
+                  onChange({ ...filters, search: '' });
+                }}
+                className="hover:text-zinc-950 cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          )}
+
           {filters.condition && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 border border-[#E4E4E7] text-zinc-800 text-xs">
               <span>Condição: {filters.condition === 'APTO' ? 'Apto' : filters.condition === 'MAL_CONDICIONADO' ? 'Mal condicionado' : 'Doente'}</span>
@@ -496,7 +491,8 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
         </div>
       )}
 
-      {/* Linha das Abas de Estado (Todos / Livres / Em clubes) e Ordenação */}
+      {/* Linha das Abas de Estado (Todos / Livres / Em clubes) e Ordenação (oculta quando filtros ativos para refletir Screenshot 2) */}
+      {!hasActiveFilters && (
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
         {/* Abas Pill */}
         <div className="bg-[#F4F4F5] p-1 rounded-xl border border-[#E4E4E7] inline-flex items-center gap-1 self-start">
@@ -515,15 +511,18 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
 
           <button
             type="button"
-            onClick={() => handleFreeToggle(true)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
-              filters.free
-                ? 'bg-white text-zinc-900 font-semibold shadow-2xs'
-                : 'text-[#686872] hover:text-zinc-900'
+            disabled={Boolean(filters.club_id)}
+            onClick={() => !filters.club_id && handleFreeToggle(true)}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs transition ${
+              filters.club_id
+                ? 'text-zinc-300 cursor-not-allowed opacity-50'
+                : filters.free
+                ? 'bg-white text-zinc-900 font-semibold shadow-2xs cursor-pointer'
+                : 'text-[#686872] hover:text-zinc-900 cursor-pointer'
             }`}
           >
             <span>Livres</span>
-            <span className="text-[11px] font-mono text-[#686872]">{freeCount}</span>
+            {!filters.club_id && <span className="text-[11px] font-mono text-[#686872]">{freeCount}</span>}
           </button>
 
           <button
@@ -580,6 +579,7 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
           )}
         </div>
       </div>
+      )}
 
       {/* Elementos Acessíveis Ocultos para Garantir Compatibilidade Total com Testes Automatizados */}
       <div className="sr-only">

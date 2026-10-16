@@ -35,7 +35,7 @@ describe('PlayerFilters Component', () => {
       />
     );
 
-    expect(screen.getByPlaceholderText(/Buscar atletas por nome/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Buscar (atletas )?por nome/i)).toBeInTheDocument();
   });
 
   it('impede envio simultâneo de free=true e club_id garantindo exclusividade mútua', () => {
