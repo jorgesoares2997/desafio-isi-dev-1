@@ -19,10 +19,15 @@ const FORMATION_REQUIREMENTS: Record<string, FormationRequirement> = {
   '1-2-1': { gol: 1, def: 1, mei: 2, ata: 1 },
 };
 
-export const LineupTab: React.FC = () => {
+interface LineupTabProps {
+  initialClubId?: number;
+  hideClubSelect?: boolean;
+}
+
+export const LineupTab: React.FC<LineupTabProps> = ({ initialClubId, hideClubSelect = false }) => {
   const { addToast } = useToast();
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [selectedClubId, setSelectedClubId] = useState<number | null>(null);
+  const [selectedClubId, setSelectedClubId] = useState<number | null>(initialClubId ?? null);
   const [clubDetail, setClubDetail] = useState<ClubDetail | null>(null);
   const [lineup, setLineup] = useState<LineupResponse | null>(null);
 
@@ -52,6 +57,12 @@ export const LineupTab: React.FC = () => {
   useEffect(() => {
     fetchClubs();
   }, [fetchClubs]);
+
+  useEffect(() => {
+    if (initialClubId) {
+      setSelectedClubId(initialClubId);
+    }
+  }, [initialClubId]);
 
   // Carregar detalhes do clube e escalação ao mudar de clube
   useEffect(() => {
@@ -184,26 +195,28 @@ export const LineupTab: React.FC = () => {
     <div className="space-y-6">
       {/* Controles de Topo: Seleção de Clube e Esquema */}
       <div className="bg-white border border-[#E4E4E7] rounded-xl p-4 sm:p-6 shadow-xs">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className={`grid grid-cols-1 ${hideClubSelect ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-4 items-end`}>
           {/* Seletor de Clube */}
-          <div>
-            <label htmlFor="club-select" className="block text-xs font-semibold uppercase tracking-wider text-[#686872] mb-2">
-              Selecione o Clube
-            </label>
-            <select
-              id="club-select"
-              value={selectedClubId || ''}
-              onChange={(e) => setSelectedClubId(Number(e.target.value))}
-              disabled={loadingClubs || clubs.length === 0}
-              className="w-full bg-[#FAFAFA] border border-[#E4E4E7] text-zinc-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
-            >
-              {clubs.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.acronym})
-                </option>
-              ))}
-            </select>
-          </div>
+          {!hideClubSelect && (
+            <div>
+              <label htmlFor="club-select" className="block text-xs font-semibold uppercase tracking-wider text-[#686872] mb-2">
+                Selecione o Clube
+              </label>
+              <select
+                id="club-select"
+                value={selectedClubId || ''}
+                onChange={(e) => setSelectedClubId(Number(e.target.value))}
+                disabled={loadingClubs || clubs.length === 0}
+                className="w-full bg-[#FAFAFA] border border-[#E4E4E7] text-zinc-900 text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#155DFC] focus:bg-white transition"
+              >
+                {clubs.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.acronym})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Seletor de Formação */}
           <div>

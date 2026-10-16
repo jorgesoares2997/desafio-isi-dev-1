@@ -4,6 +4,7 @@ import { Menu, RotateCw, PanelLeft } from 'lucide-react';
 interface BreadcrumbsHeaderProps {
   activeTab: 'home' | 'players' | 'clubs' | 'league';
   selectedClubName?: string;
+  onNavigateToClubs?: () => void;
   onRefresh: () => void;
   onToggleSidebar: () => void;
   isSidebarCollapsed?: boolean;
@@ -14,6 +15,7 @@ interface BreadcrumbsHeaderProps {
 export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
   activeTab,
   selectedClubName,
+  onNavigateToClubs,
   onRefresh,
   onToggleSidebar,
   isSidebarCollapsed = false,
@@ -64,7 +66,13 @@ export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
             <>
               <span className="text-[#686872]">Mercado</span>
               <span className="text-zinc-300">›</span>
-              <span className="text-[#686872]">Clubes</span>
+              <button
+                type="button"
+                onClick={onNavigateToClubs}
+                className="text-[#686872] hover:text-[#155DFC] transition cursor-pointer"
+              >
+                Clubes
+              </button>
               <span className="text-zinc-300">›</span>
               <span className="font-semibold text-zinc-900">{selectedClubName}</span>
             </>
