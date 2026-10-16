@@ -30,6 +30,37 @@ export function formatDateTime(isoString: string | undefined | null): string {
   }
 }
 
+export function formatDecimal(value: number | undefined | null): string {
+  if (value === undefined || value === null || isNaN(value)) {
+    return '0,00';
+  }
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export function formatInteger(value: number | undefined | null): string {
+  if (value === undefined || value === null || isNaN(value)) {
+    return '0';
+  }
+  return new Intl.NumberFormat('pt-BR').format(value);
+}
+
+export function splitDateTime(isoString: string | undefined | null): { date: string; time: string } {
+  if (!isoString) return { date: '-', time: '' };
+  try {
+    const formatted = formatDateTime(isoString);
+    if (formatted === '-' || !formatted.includes(' ')) {
+      return { date: formatted, time: '' };
+    }
+    const [date, time] = formatted.split(' ');
+    return { date, time: time || '' };
+  } catch {
+    return { date: isoString, time: '' };
+  }
+}
+
 export function getPositionBadgeClass(position: PlayerPosition | string): string {
   switch (position) {
     case 'GOL':

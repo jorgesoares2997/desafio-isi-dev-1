@@ -156,6 +156,7 @@ function MainApp() {
         <BreadcrumbsHeader
           activeTab={activeTab}
           selectedClubName={selectedClub?.name}
+          onNavigateToClubs={() => setSelectedClubId(null)}
           onRefresh={handleGlobalRefresh}
           onToggleSidebar={() => setSidebarMobileOpen(true)}
           isSidebarCollapsed={isSidebarCollapsed}
@@ -201,9 +202,11 @@ function MainApp() {
       <ClubCreateModal
         isOpen={isClubCreateOpen}
         onClose={() => setIsClubCreateOpen(false)}
-        onSuccess={() => {
+        onSuccess={(newClub) => {
           fetchClubs();
           fetchMetrics();
+          setSelectedClubId(newClub.id);
+          setActiveTab('clubs');
         }}
       />
     </div>
