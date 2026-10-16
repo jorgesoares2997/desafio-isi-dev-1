@@ -103,6 +103,29 @@ export interface SellResponse {
   club_cash?: number;
 }
 
+export interface BuyResponse {
+  id: number;
+  club_id: number;
+  player_id: number;
+  player_name: string;
+  type: string;
+  value: number;
+  fee: number;
+  penalty: number;
+  profit: number;
+  cash_change: number;
+  created_at: string;
+  contract?: {
+    id: number;
+    player_id: number;
+    club_id: number;
+    status: string;
+    loyalty_until: string;
+    purchase_value: number;
+  };
+  club_cash: number;
+}
+
 export interface LineupResponse {
   club_id: number;
   formation: string;

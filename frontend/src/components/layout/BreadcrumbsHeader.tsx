@@ -4,7 +4,10 @@ import { Menu, RotateCw, PanelLeft } from 'lucide-react';
 interface BreadcrumbsHeaderProps {
   activeTab: 'home' | 'players' | 'clubs' | 'league';
   selectedClubName?: string;
+  leagueSubtab?: 'matches' | 'standings';
+  viewingMatchTitle?: string;
   onNavigateToClubs?: () => void;
+  onNavigateToMatches?: () => void;
   onRefresh: () => void;
   onToggleSidebar: () => void;
   isSidebarCollapsed?: boolean;
@@ -15,7 +18,10 @@ interface BreadcrumbsHeaderProps {
 export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
   activeTab,
   selectedClubName,
+  leagueSubtab = 'matches',
+  viewingMatchTitle,
   onNavigateToClubs,
+  onNavigateToMatches,
   onRefresh,
   onToggleSidebar,
   isSidebarCollapsed = false,
@@ -82,7 +88,23 @@ export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
             <>
               <span className="text-[#686872]">Liga</span>
               <span className="text-zinc-300">›</span>
-              <span className="font-semibold text-zinc-900">Simulação &amp; Tabela</span>
+              {viewingMatchTitle ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={onNavigateToMatches}
+                    className="text-[#686872] hover:text-[#155DFC] transition cursor-pointer"
+                  >
+                    Partidas
+                  </button>
+                  <span className="text-zinc-300">›</span>
+                  <span className="font-semibold text-zinc-900">{viewingMatchTitle}</span>
+                </>
+              ) : leagueSubtab === 'standings' ? (
+                <span className="font-semibold text-zinc-900">Classificação</span>
+              ) : (
+                <span className="font-semibold text-zinc-900">Partidas</span>
+              )}
             </>
           )}
         </nav>

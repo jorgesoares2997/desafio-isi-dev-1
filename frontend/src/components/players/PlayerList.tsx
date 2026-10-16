@@ -10,8 +10,8 @@ import { PlayerDeleteModal } from './PlayerDeleteModal';
 import { QuickBuyModal } from './QuickBuyModal';
 import { PlayerSuccessModal } from './PlayerSuccessModal';
 import { PlayerDetailDrawer } from './PlayerDetailDrawer';
-import { TableSkeleton } from '../common/Skeleton';
-import { EmptyState } from '../common/EmptyState';
+import { PlayerTableSkeleton } from '../common/Skeleton';
+import { EmptyState, DisconnectedLayersIcon } from '../common/EmptyState';
 import { 
   Users, 
   Plus, 
@@ -22,7 +22,10 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  Eye
+  Eye,
+  RotateCw,
+  X as XIcon,
+  SearchX
 } from 'lucide-react';
 
 const INITIAL_FILTERS: PlayerFilterValues = {
@@ -62,6 +65,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   const { showToast } = useToast();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [filters, setFilters] = useState<PlayerFilterValues>(INITIAL_FILTERS);
 
   // Pagination state
@@ -77,6 +81,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   const [recentAction, setRecentAction] = useState<'condition_changed' | 'player_deleted' | null>(null);
   const [lastDeletedPlayer, setLastDeletedPlayer] = useState<Player | null>(null);
   const [isModalStarterDoente, setIsModalStarterDoente] = useState(false);
+  const [recentBuyError, setRecentBuyError] = useState<string | null>(null);
 
   // Modals and Drawer state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -122,6 +127,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
 
   const fetchPlayers = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const params: Record<string, string | number | boolean> = {
         page: currentPage,
@@ -145,7 +151,9 @@ export const PlayerList: React.FC<PlayerListProps> = ({
       setTotalPages(resp.data.meta.total_pages);
       setTotalItems(resp.data.meta.total_items);
     } catch (err) {
-      showToast('error', getApiErrorMessage(err));
+      const msg = getApiErrorMessage(err);
+      setLoadError(msg);
+      showToast('error', msg);
     } finally {
       setLoading(false);
     }
@@ -163,12 +171,14 @@ export const PlayerList: React.FC<PlayerListProps> = ({
     setFilters(newFilters);
     setCurrentPage(1);
     setRecentAction(null);
+    setRecentBuyError(null);
   };
 
   const handleResetFilters = () => {
     setFilters(INITIAL_FILTERS);
     setCurrentPage(1);
     setRecentAction(null);
+    setRecentBuyError(null);
   };
 
   const getClubName = (clubId: number | null) => {
@@ -208,6 +218,15 @@ export const PlayerList: React.FC<PlayerListProps> = ({
 
   // Footnote text logic strictly matching all Figma states
   const getFootnoteText = () => {
+    if (recentBuyError?.includes('12 jogadores') || recentBuyError?.includes('Delta FC')) {
+      return 'Cenário próprio, fora da base: o Delta FC já tem 12 jogadores. A tela não impede a compra por elenco cheio: envia o pedido, a API recusa com 409 (RN14), nada é gravado, e a tela mostra a message.';
+    }
+    if (recentBuyError?.includes('já vendeu') || recentBuyError?.includes('Lucas Ferraz')) {
+      return 'Depois da venda do Lucas Ferraz (V03), o Águias FC tenta comprá-lo de novo: a API recusa com 409 (RN12), nada é gravado, e a tela mostra o message. Outro clube pode comprá-lo.';
+    }
+    if (filters.club_id) {
+      return 'Depois da compra, a tabela mostra o clube do jogador e o filtro por clube o encontra. Com um clube filtrado, a aba "Livres" fica indisponível, porque essa combinação não é aceita (a API recusa com 400).';
+    }
     if (Boolean(conditionPlayer) && isModalStarterDoente && conditionPlayer?.club_id) {
       const starterClub = clubs.find((c) => c.id === conditionPlayer.club_id);
       return `${conditionPlayer.name} é titular do ${starterClub?.name || 'clube'}, segundo GET /clubs/{id}/lineup. Ao escolher Doente, a tela avisa que ele sai da escalação na mesma operação da alteração (RN19), como a V01 faz na venda.`;
@@ -232,7 +251,6 @@ export const PlayerList: React.FC<PlayerListProps> = ({
     }
     if (
       filters.condition ||
-      filters.club_id ||
       filters.position ||
       filters.min_age ||
       filters.max_age ||
@@ -282,22 +300,52 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         onReset={handleResetFilters}
         totalCount={totalItems}
         freeCount={freeCount}
-        inClubCount={inClubCount}
+        inClubCount={filters.club_id ? totalItems : inClubCount}
       />
 
       {/* Players Data Table Card */}
-      <div className="bg-white border border-[#E4E4E7] rounded-xl shadow-2xs overflow-hidden">
+      <div className="bg-white border border-[#E4E4E7] rounded-2xl shadow-xs overflow-hidden">
         {loading ? (
-          <TableSkeleton rows={8} cols={9} />
-        ) : players.length === 0 ? (
+          <PlayerTableSkeleton />
+        ) : loadError ? (
           <EmptyState
-            title="Nenhum jogador encontrado"
-            description="Não encontramos atletas para os critérios de busca selecionados. Tente ajustar ou limpar seus filtros."
+            icon={DisconnectedLayersIcon}
+            title="Não foi possível carregar os jogadores"
+            description="Não foi possível carregar os dados. Verifique a conexão e tente de novo."
             action={{
-              label: 'Limpar filtros',
-              onClick: handleResetFilters,
+              label: 'Tentar de novo',
+              onClick: fetchPlayers,
+              icon: RotateCw,
             }}
           />
+        ) : players.length === 0 ? (
+          (filters.search.trim() || filters.position || filters.condition || filters.club_id || filters.free || filters.min_age || filters.max_age || filters.min_value || filters.max_value) ? (
+            <EmptyState
+              icon={SearchX}
+              title={
+                filters.search.trim()
+                  ? `Nenhum jogador encontrado para “${filters.search.trim()}”`
+                  : 'Nenhum jogador encontrado'
+              }
+              description="Confira a grafia ou tire alguns filtros. A busca ignora maiúsculas, minúsculas e acentos."
+              action={{
+                label: 'Limpar filtros',
+                onClick: handleResetFilters,
+                icon: XIcon,
+              }}
+            />
+          ) : (
+            <EmptyState
+              icon={Users}
+              title="Nenhum jogador cadastrado"
+              description="Com o banco recém-criado, a lista começa vazia."
+              action={{
+                label: 'Novo jogador',
+                onClick: () => setIsCreateOpen(true),
+                icon: Plus,
+              }}
+            />
+          )
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm text-zinc-800">
@@ -440,7 +488,10 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                           <div className="flex items-center gap-3">
                             <span className="text-zinc-600 text-xs">Livre</span>
                             <button
-                              onClick={() => setBuyingPlayer(player)}
+                              onClick={() => {
+                                setBuyingPlayer(player);
+                                setRecentBuyError(null);
+                              }}
                               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-zinc-300 hover:bg-zinc-50 active:scale-95 text-zinc-800 text-xs font-medium cursor-pointer transition shadow-2xs"
                               title={`Comprar ${player.name}`}
                             >
@@ -561,56 +612,60 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         )}
 
         {/* Table Footer with Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3.5 px-4 border-t border-[#E4E4E7] text-xs text-[#686872] select-none">
-          <div>
-            Mostrando <span className="font-medium text-zinc-900">{startItem}–{endItem}</span> de{' '}
-            <span className="font-medium text-zinc-900">{totalItems}</span>{' '}
-            {totalItems === 1 ? 'jogador' : 'jogadores'}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-700 hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              Anterior
-            </button>
-
-            {/* Page number buttons */}
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`w-7 h-7 rounded-lg text-xs font-medium transition cursor-pointer ${
-                    pageNum === currentPage
-                      ? 'border border-[#E4E4E7] bg-white text-zinc-900 shadow-2xs font-bold'
-                      : 'text-zinc-600 hover:bg-zinc-100'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
+        {!loading && !loadError && players.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3.5 px-4 border-t border-[#E4E4E7] text-xs text-[#686872] select-none">
+            <div>
+              Mostrando <span className="font-medium text-zinc-900">{startItem}–{endItem}</span> de{' '}
+              <span className="font-medium text-zinc-900">{totalItems}</span>{' '}
+              {totalItems === 1 ? 'jogador' : 'jogadores'}
             </div>
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-700 hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
-            >
-              Próxima
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-700 hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Anterior
+              </button>
+
+              {/* Page number buttons */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-7 h-7 rounded-lg text-xs font-medium transition cursor-pointer ${
+                      pageNum === currentPage
+                        ? 'border border-[#E4E4E7] bg-white text-zinc-900 shadow-2xs font-bold'
+                        : 'text-zinc-600 hover:bg-zinc-100'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-700 hover:text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+              >
+                Próxima
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Footnote strictly matching Figma Screenshots */}
-      <p className="text-xs text-zinc-500 px-1 leading-relaxed">
-        {getFootnoteText()}
-      </p>
+      {!loading && !loadError && players.length > 0 && (
+        <p className="text-xs text-zinc-500 px-1 leading-relaxed">
+          {getFootnoteText()}
+        </p>
+      )}
 
       {/* Modals and Drawers */}
       <PlayerCreateModal
@@ -681,11 +736,18 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         player={buyingPlayer}
         clubs={clubs}
         onClose={() => setBuyingPlayer(null)}
+        onViewClub={(clubId) => {
+          setBuyingPlayer(null);
+          setRecentBuyError(null);
+          onClubClick?.(clubId);
+        }}
         onSuccess={() => {
+          setRecentBuyError(null);
           fetchPlayers();
           fetchCounts();
           onRefreshClubs?.();
         }}
+        onBuyError={(errMsg) => setRecentBuyError(errMsg)}
       />
     </div>
   );

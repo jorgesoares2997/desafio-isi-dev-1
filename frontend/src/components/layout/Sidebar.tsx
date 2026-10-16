@@ -13,12 +13,13 @@ import { Club } from '../../types';
 
 interface SidebarProps {
   activeTab: 'home' | 'players' | 'clubs' | 'league';
+  leagueSubtab?: 'matches' | 'standings';
   selectedClubId: number | null;
   clubs: Club[];
   totalPlayers: number;
   totalMatches: number;
   latestMatch: { home: string; away: string; homeGoals: number; awayGoals: number } | null;
-  onTabChange: (tab: 'home' | 'players' | 'clubs' | 'league') => void;
+  onTabChange: (tab: 'home' | 'players' | 'clubs' | 'league', leagueSubtab?: 'matches' | 'standings') => void;
   onSelectClub: (clubId: number) => void;
   onCreateClub: () => void;
   isOpen: boolean;
@@ -28,6 +29,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
+  leagueSubtab = 'matches',
   selectedClubId,
   clubs,
   totalPlayers,
@@ -113,15 +115,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </p>
 
           <button
-            onClick={() => { onTabChange('league'); onClose(); }}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition ${
-              activeTab === 'league'
+            onClick={() => { onTabChange('league', 'matches'); onClose(); }}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+              activeTab === 'league' && leagueSubtab === 'matches'
                 ? 'bg-white text-zinc-900 border border-[#E4E4E7] shadow-xs'
                 : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/50'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Swords className={`w-4 h-4 ${activeTab === 'league' ? 'text-[#155DFC]' : 'text-[#686872]'}`} />
+              <Swords className={`w-4 h-4 ${activeTab === 'league' && leagueSubtab === 'matches' ? 'text-[#155DFC]' : 'text-[#686872]'}`} />
               <span>Partidas</span>
             </div>
             <span className="font-mono text-[11px] text-[#686872]">
@@ -130,11 +132,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           <button
-            onClick={() => { onTabChange('league'); onClose(); }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/50 transition"
+            onClick={() => { onTabChange('league', 'standings'); onClose(); }}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+              activeTab === 'league' && leagueSubtab === 'standings'
+                ? 'bg-white text-zinc-900 border border-[#E4E4E7] shadow-xs'
+                : 'text-[#686872] hover:text-zinc-900 hover:bg-zinc-200/50'
+            }`}
           >
             <div className="flex items-center gap-2.5">
-              <ListOrdered className="w-4 h-4 text-[#686872]" />
+              <ListOrdered className={`w-4 h-4 ${activeTab === 'league' && leagueSubtab === 'standings' ? 'text-[#155DFC]' : 'text-[#686872]'}`} />
               <span>Classificação</span>
             </div>
           </button>
@@ -211,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <p className="text-[11px] text-[#686872] mt-0.5 truncate max-w-[150px]">
                 {latestMatch 
                   ? `${latestMatch.home} ${latestMatch.homeGoals} × ${latestMatch.awayGoals} ${latestMatch.away}`
-                  : 'Nenhuma partida ainda'}
+                  : 'nenhuma ainda'}
               </p>
             </div>
           </div>
