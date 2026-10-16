@@ -6,6 +6,8 @@ interface BreadcrumbsHeaderProps {
   selectedClubName?: string;
   onRefresh: () => void;
   onToggleSidebar: () => void;
+  isSidebarCollapsed?: boolean;
+  onToggleCollapseSidebar?: () => void;
   refreshing?: boolean;
 }
 
@@ -14,6 +16,8 @@ export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
   selectedClubName,
   onRefresh,
   onToggleSidebar,
+  isSidebarCollapsed = false,
+  onToggleCollapseSidebar,
   refreshing = false,
 }) => {
   return (
@@ -22,16 +26,21 @@ export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
         {/* Mobile Toggle Button */}
         <button
           onClick={onToggleSidebar}
-          className="lg:hidden p-1.5 rounded-lg border border-[#E4E4E7] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition"
+          className="lg:hidden p-1.5 rounded-lg border border-[#E4E4E7] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition cursor-pointer"
           aria-label="Abrir menu"
         >
           <Menu className="w-4 h-4" />
         </button>
 
-        {/* Panel Left Icon */}
-        <div className="hidden sm:flex text-zinc-400">
-          <PanelLeft className="w-4 h-4" />
-        </div>
+        {/* Desktop Collapsible Sidebar Toggle Button */}
+        <button
+          onClick={onToggleCollapseSidebar}
+          title={isSidebarCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+          className="hidden lg:flex p-1.5 rounded-lg border border-[#E4E4E7] text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition cursor-pointer"
+          aria-label={isSidebarCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
+        >
+          <PanelLeft className={`w-4 h-4 transition-transform duration-200 ${isSidebarCollapsed ? 'rotate-180 text-[#155DFC]' : 'text-zinc-500'}`} />
+        </button>
 
         {/* Breadcrumb Path */}
         <nav className="flex items-center gap-1.5 text-xs text-[#686872]">
@@ -65,21 +74,21 @@ export const BreadcrumbsHeader: React.FC<BreadcrumbsHeaderProps> = ({
             <>
               <span className="text-[#686872]">Liga</span>
               <span className="text-zinc-300">›</span>
-              <span className="font-semibold text-zinc-900">Partidas &amp; Classificação</span>
+              <span className="font-semibold text-zinc-900">Simulação &amp; Tabela</span>
             </>
           )}
         </nav>
       </div>
 
-      {/* Right Actions: Refresh */}
+      {/* Right Action: Refresh Icon */}
       <button
         onClick={onRefresh}
-        title="Atualizar dados"
         disabled={refreshing}
-        className="p-2 rounded-lg border border-[#E4E4E7] bg-white hover:bg-zinc-50 active:scale-95 text-zinc-600 hover:text-zinc-900 transition shadow-2xs cursor-pointer"
-        aria-label="Atualizar dados"
+        title="Recarregar dados"
+        className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition cursor-pointer"
+        aria-label="Atualizar dados da liga"
       >
-        <RotateCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#155DFC]' : ''}`} />
+        <RotateCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#155DFC]' : ''}`} />
       </button>
     </header>
   );

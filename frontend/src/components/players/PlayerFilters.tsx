@@ -95,10 +95,8 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
     switch (filters.sort) {
       case 'value_desc': return 'maior valor de mercado';
       case 'value_asc': return 'menor valor de mercado';
-      case 'age_asc': return 'mais jovem';
-      case 'age_desc': return 'mais velho';
-      case 'overall': return 'overall';
-      case 'agility': return 'agilidade';
+      case 'age_desc': return 'maior idade';
+      case 'age_asc': return 'menor idade';
       case 'position': return 'posição';
       default: return 'nome';
     }
@@ -551,26 +549,33 @@ export const PlayerFilters: React.FC<PlayerFiltersProps> = ({
           </button>
 
           {activeDropdown === 'sort' && (
-            <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-[#E4E4E7] rounded-xl shadow-lg p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
-              {[
-                { val: 'name', label: 'Nome' },
-                { val: 'value_desc', label: 'Maior valor de mercado' },
-                { val: 'value_asc', label: 'Menor valor de mercado' },
-                { val: 'overall', label: 'Overall' },
-                { val: 'age_asc', label: 'Mais jovem' },
-                { val: 'age_desc', label: 'Mais velho' },
-                { val: 'agility', label: 'Agilidade' },
-              ].map((s) => (
-                <button
-                  key={s.val}
-                  onClick={() => { onChange({ ...filters, sort: s.val }); setActiveDropdown(null); }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition ${
-                    filters.sort === s.val ? 'bg-[#EFF6FF] text-[#1447E6] font-semibold' : 'hover:bg-zinc-50 text-zinc-700'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+            <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-[#E4E4E7] rounded-2xl shadow-xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-3 py-1.5 text-[11px] font-semibold text-zinc-400 border-b border-[#E4E4E7]/60">
+                Ordenar por
+              </div>
+              <div className="py-1">
+                {[
+                  { val: 'name', label: 'Nome' },
+                  { val: 'value_desc', label: 'Maior valor de mercado' },
+                  { val: 'value_asc', label: 'Menor valor de mercado' },
+                  { val: 'age_desc', label: 'Maior idade' },
+                  { val: 'age_asc', label: 'Menor idade' },
+                  { val: 'position', label: 'Posição (GOL a ATA)' },
+                ].map((s) => (
+                  <button
+                    key={s.val}
+                    type="button"
+                    onClick={() => { onChange({ ...filters, sort: s.val }); setActiveDropdown(null); }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs transition cursor-pointer ${
+                      filters.sort === s.val
+                        ? 'bg-[#EFF6FF] text-[#1447E6] font-semibold'
+                        : 'hover:bg-zinc-100 text-zinc-700'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -86,7 +86,15 @@ export const PlayerConditionModal: React.FC<PlayerConditionModalProps> = ({
       const resp = await api.patch<Player>(`/players/${player.id}/condition`, {
         condition,
       });
-      showToast('success', `Condição física do atleta atualizada para: ${condition}`);
+      const formatNumber = (num: number) =>
+        num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const condLabel =
+        condition === 'APTO' ? 'Apto' : condition === 'MAL_CONDICIONADO' ? 'Mal condicionado' : 'Doente';
+      showToast(
+        'success',
+        `${resp.data.name} agora está ${condLabel}. Valor de mercado: ${formatNumber(resp.data.market_value)}.`,
+        'Condição alterada'
+      );
       onSuccess(resp.data);
       onClose();
     } catch (err) {
