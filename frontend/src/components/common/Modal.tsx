@@ -8,6 +8,8 @@ interface ModalProps {
   description?: string;
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+  headerIcon?: React.ReactNode;
+  borderHeader?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -17,6 +19,8 @@ export const Modal: React.FC<ModalProps> = ({
   description,
   children,
   maxWidth = 'lg',
+  headerIcon,
+  borderHeader = true,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,23 +61,24 @@ export const Modal: React.FC<ModalProps> = ({
         aria-labelledby="modal-title"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-[#E4E4E7] flex items-center justify-between bg-white">
+        <div className={`px-6 pt-5 ${borderHeader ? 'pb-4 border-b border-[#E4E4E7]' : 'pb-1'} flex items-start justify-between bg-white`}>
           <div>
-            <h3 id="modal-title" className="text-base font-semibold text-zinc-900 tracking-tight">
+            {headerIcon && <div className="mb-2.5">{headerIcon}</div>}
+            <h3 id="modal-title" className="text-base font-bold text-zinc-900 tracking-tight">
               {title}
             </h3>
             {description && (
-              <p className="text-xs text-[#686872] mt-0.5">
+              <p className="text-xs text-[#686872] mt-0.5 leading-relaxed">
                 {description}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-[#686872] hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition"
+            className="p-1.5 text-[#686872] hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition -mr-1"
             aria-label="Fechar modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
