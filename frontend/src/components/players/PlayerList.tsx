@@ -76,6 +76,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   // Recent action indicator for contextual footnotes (Screenshots 1, 4, 5)
   const [recentAction, setRecentAction] = useState<'condition_changed' | 'player_deleted' | null>(null);
   const [lastDeletedPlayer, setLastDeletedPlayer] = useState<Player | null>(null);
+  const [isModalStarterDoente, setIsModalStarterDoente] = useState(false);
 
   // Modals and Drawer state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -207,6 +208,10 @@ export const PlayerList: React.FC<PlayerListProps> = ({
 
   // Footnote text logic strictly matching all Figma states
   const getFootnoteText = () => {
+    if (Boolean(conditionPlayer) && isModalStarterDoente && conditionPlayer?.club_id) {
+      const starterClub = clubs.find((c) => c.id === conditionPlayer.club_id);
+      return `${conditionPlayer.name} é titular do ${starterClub?.name || 'clube'}, segundo GET /clubs/{id}/lineup. Ao escolher Doente, a tela avisa que ele sai da escalação na mesma operação da alteração (RN19), como a V01 faz na venda.`;
+    }
     if (recentAction === 'condition_changed') {
       return 'A tela mostra o novo valor de mercado depois da alteração.';
     }
@@ -645,7 +650,14 @@ export const PlayerList: React.FC<PlayerListProps> = ({
       <PlayerConditionModal
         isOpen={Boolean(conditionPlayer)}
         player={conditionPlayer}
-        onClose={() => setConditionPlayer(null)}
+        clubs={clubs}
+        onClose={() => {
+          setConditionPlayer(null);
+          setIsModalStarterDoente(false);
+        }}
+        onConditionSelect={(cond, starter) => {
+          setIsModalStarterDoente(cond === 'DOENTE' && starter);
+        }}
         onSuccess={() => {
           fetchPlayers();
           setRecentAction('condition_changed');
