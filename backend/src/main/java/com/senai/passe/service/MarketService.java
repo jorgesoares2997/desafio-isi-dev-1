@@ -81,12 +81,12 @@ public class MarketService {
 
         long tamanhoElenco = jogadorRepository.countByClubeIdAndExcluidoEmIsNull(clube.getId());
         if (tamanhoElenco >= 12) {
-            throw new BusinessRuleException("O clube já atingiu o limite de 12 jogadores no elenco.");
+            throw new BusinessRuleException(String.format("O elenco do %s já tem 12 jogadores, o limite da liga.", clube.getNome()));
         }
 
         boolean jaVendeu = transacaoRepository.existsByClubeIdAndJogadorIdAndTipo(clube.getId(), jogador.getId(), "VENDA");
         if (jaVendeu) {
-            throw new BusinessRuleException("Um clube não pode comprar um jogador que ele mesmo já vendeu.");
+            throw new BusinessRuleException(String.format("O %s já vendeu o %s e não pode comprá-lo de novo.", clube.getNome(), jogador.getNome()));
         }
 
         BigDecimal marketValue = valuationService.calcularValorMercado(
@@ -154,7 +154,7 @@ public class MarketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Jogador não encontrado para o ID: " + playerId));
 
         if (jogador.getClubeId() == null) {
-            throw new BusinessRuleException("Jogador livre não pode ser vendido.");
+            throw new BusinessRuleException(String.format("%s já está livre e não pode ser vendido.", jogador.getNome()));
         }
 
         Clube clube = clubeRepository.findById(jogador.getClubeId())
@@ -231,7 +231,7 @@ public class MarketService {
         if (playerIdFilter != null) {
             playerId = ValidationUtils.parsePositiveId(playerIdFilter);
             if (!jogadorRepository.findByIdAndExcluidoEmIsNull(playerId).isPresent()) {
-                throw new ResourceNotFoundException("Jogador não encontrado para o ID: " + playerIdFilter);
+                throw new ResourceNotFoundException("Jogador não encontrado.");
             }
         }
 
