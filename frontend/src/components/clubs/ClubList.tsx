@@ -1,21 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Club } from '../../types';
 import { ClubCreateModal } from './ClubCreateModal';
-import { EmptyState } from '../common/EmptyState';
 import { TableSkeleton } from '../common/Skeleton';
 import { formatDecimal } from '../../utils/formatters';
+import { EmptyState, ServerOff } from '../common/EmptyState';
 import { 
   Shield, 
   Plus, 
   ChevronRight, 
   ChevronDown, 
   ArrowUpDown, 
-  Check 
+  Check,
+  RotateCw
 } from 'lucide-react';
 
 interface ClubListProps {
   clubs: Club[];
   loading: boolean;
+  error?: string | null;
   onRefresh: () => void;
   onSelectClub: (clubId: number) => void;
 }
@@ -23,6 +25,7 @@ interface ClubListProps {
 export const ClubList: React.FC<ClubListProps> = ({
   clubs,
   loading,
+  error,
   onRefresh,
   onSelectClub,
 }) => {
@@ -166,20 +169,37 @@ export const ClubList: React.FC<ClubListProps> = ({
           </div>
         </div>
 
-        {/* Clubs Table / Loading / Empty */}
-        {loading ? (
+        {/* Clubs Table / Loading / Empty / Error */}
+        {error && clubs.length === 0 ? (
+          <div className="p-16">
+            <EmptyState
+              icon={ServerOff}
+              title="Não foi possível carregar os clubes"
+              description={error || 'Tente de novo. Se a API respondeu, mostre o message dela.'}
+              action={{
+                label: 'Tentar de novo',
+                onClick: onRefresh,
+                icon: RotateCw,
+              }}
+              className="py-0 px-0"
+            />
+          </div>
+        ) : loading ? (
           <div className="p-6">
             <TableSkeleton rows={6} cols={6} />
           </div>
         ) : sortedClubs.length === 0 ? (
-          <div className="p-8">
+          <div className="p-16">
             <EmptyState
+              icon={Shield}
               title="Nenhum clube cadastrado"
-              description="A liga ainda não possui clubes. Clique em 'Novo clube' para cadastrar a primeira agremiação esportiva com 300,00 de caixa inicial."
+              description="Crie o primeiro clube para começar."
               action={{
-                label: 'Criar primeiro clube',
+                label: 'Novo clube',
                 onClick: () => setIsCreateOpen(true),
+                icon: Plus,
               }}
+              className="py-0 px-0"
             />
           </div>
         ) : (
@@ -244,9 +264,11 @@ export const ClubList: React.FC<ClubListProps> = ({
       </div>
 
       {/* Dynamic Footnote */}
-      <p className="text-xs text-[#686872] px-1">
-        Clubes pelo nome por padrão ou pelo patrimônio, do maior para o menor, com empate desfeito pelo nome.
-      </p>
+      {!error && sortedClubs.length > 0 && (
+        <p className="text-xs text-[#686872] px-1">
+          Clubes pelo nome por padrão ou pelo patrimônio, do maior para o menor, com empate desfeito pelo nome.
+        </p>
+      )}
 
       {/* Modal de Criação */}
       <ClubCreateModal
