@@ -5,7 +5,7 @@ import { ClubDetail, PlayerInClub, TransactionsListResponse } from '../../types'
 import { BuyPlayerModal } from './BuyPlayerModal';
 import { SellPlayerModal } from './SellPlayerModal';
 import { ClubTransactionsTab } from './ClubTransactionsTab';
-import { LineupTab } from '../league/LineupTab';
+import { ClubLineupTab } from './ClubLineupTab';
 import { TableSkeleton } from '../common/Skeleton';
 import { EmptyState } from '../common/EmptyState';
 import { 
@@ -21,14 +21,18 @@ import {
   Shirt, 
   Users, 
   Check, 
-  Tag, 
+  ArrowLeftRight,
   ClipboardList, 
-  Clock 
+  Clock,
+  ArrowLeft,
+  SearchX
 } from 'lucide-react';
 
 interface ClubDetailViewProps {
   clubId: number;
   onBack: () => void;
+  initialTab?: 'squad' | 'lineup' | 'history';
+  onTabChange?: (tab: 'squad' | 'lineup' | 'history') => void;
 }
 
 const POSITION_ORDER: Record<string, number> = {
@@ -60,12 +64,30 @@ function getPlayerAvatar(name: string, id: number) {
   return { ...palette, initials };
 }
 
-export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }) => {
+export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ 
+  clubId, 
+  onBack,
+  initialTab = 'squad',
+  onTabChange,
+}) => {
   const { showToast } = useToast();
   const [club, setClub] = useState<ClubDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'squad' | 'lineup' | 'history'>('squad');
+  const [activeTab, setActiveTab] = useState<'squad' | 'lineup' | 'history'>(initialTab);
   const [txCount, setTxCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  const handleTabClick = (tab: 'squad' | 'lineup' | 'history') => {
+    setActiveTab(tab);
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
 
   // Modals state
   const [isBuyOpen, setIsBuyOpen] = useState(false);
@@ -104,11 +126,24 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
 
   if (!club) {
     return (
-      <EmptyState
-        title="Clube não encontrado"
-        description="Não foi possível carregar os detalhes do clube selecionado."
-        action={{ label: 'Voltar para Clubes', onClick: onBack }}
-      />
+      <div className="space-y-4">
+        <div className="bg-white border border-[#E4E4E7] rounded-2xl p-16 shadow-xs flex flex-col items-center justify-center text-center min-h-[380px]">
+          <EmptyState
+            icon={SearchX}
+            title="Clube não encontrado"
+            description="Clube não encontrado. O endereço pode estar errado ou o clube não existe."
+            action={{
+              label: 'Voltar para clubes',
+              onClick: onBack,
+              icon: ArrowLeft,
+            }}
+            className="py-0 px-0"
+          />
+        </div>
+        <p className="text-xs text-[#686872] px-1">
+          Clube inexistente: a tela mostra a mensagem e oferece o caminho de volta.
+        </p>
+      </div>
     );
   }
 
@@ -217,7 +252,7 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
       <div className="border-b border-[#E4E4E7] flex items-center gap-8 text-sm select-none">
         <button
           type="button"
-          onClick={() => setActiveTab('squad')}
+          onClick={() => handleTabClick('squad')}
           className={`pb-3.5 border-b-2 transition flex items-center gap-2 cursor-pointer ${
             activeTab === 'squad'
               ? 'border-[#155DFC] text-[#155DFC] font-semibold'
@@ -237,7 +272,7 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
 
         <button
           type="button"
-          onClick={() => setActiveTab('lineup')}
+          onClick={() => handleTabClick('lineup')}
           className={`pb-3.5 border-b-2 transition flex items-center gap-2 cursor-pointer ${
             activeTab === 'lineup'
               ? 'border-[#155DFC] text-[#155DFC] font-semibold'
@@ -250,7 +285,7 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
 
         <button
           type="button"
-          onClick={() => setActiveTab('history')}
+          onClick={() => handleTabClick('history')}
           className={`pb-3.5 border-b-2 transition flex items-center gap-2 cursor-pointer ${
             activeTab === 'history'
               ? 'border-[#155DFC] text-[#155DFC] font-semibold'
@@ -427,7 +462,7 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
                               onClick={() => setSellingPlayer(player)}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E4E4E7] bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-medium shadow-2xs transition active:scale-95 cursor-pointer whitespace-nowrap"
                             >
-                              <Tag className="w-3.5 h-3.5 text-zinc-500" />
+                              <ArrowLeftRight className="w-3.5 h-3.5 text-zinc-500" />
                               Vender
                             </button>
                           </td>
@@ -449,12 +484,12 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
 
       {/* Tab Content 2: Escalação (Lineup) */}
       {activeTab === 'lineup' && (
-        <LineupTab initialClubId={club.id} hideClubSelect={true} />
+        <ClubLineupTab club={club} onLineupUpdated={fetchClub} />
       )}
 
       {/* Tab Content 3: Histórico (Transactions) */}
       {activeTab === 'history' && (
-        <ClubTransactionsTab clubId={club.id} />
+        <ClubTransactionsTab clubId={club.id} club={club} />
       )}
 
       {/* Buy & Sell Modals */}
@@ -470,6 +505,10 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({ clubId, onBack }
         player={sellingPlayer}
         club={club}
         onClose={() => setSellingPlayer(null)}
+        onViewHistory={() => {
+          setSellingPlayer(null);
+          handleTabClick('history');
+        }}
         onSuccess={() => fetchClub()}
       />
     </div>
