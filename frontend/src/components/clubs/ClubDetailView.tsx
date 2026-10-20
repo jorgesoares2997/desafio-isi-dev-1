@@ -497,7 +497,9 @@ export const ClubDetailView: React.FC<ClubDetailViewProps> = ({
         isOpen={isBuyOpen}
         onClose={() => setIsBuyOpen(false)}
         club={club}
-        onSuccess={() => fetchClub()}
+        onSuccess={() => {
+          fetchClub();
+        }}
       />
 
       <SellPlayerModal

@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { 
-  Users, 
-  UserCheck, 
-  Shield, 
-  Swords, 
-  CheckCircle2, 
-  ShoppingCart, 
-  Banknote, 
-  History, 
-  Trophy, 
-  Clock, 
+import {
+  Users,
+  UserCheck,
+  Shield,
+  Swords,
+  CheckCircle2,
+  ShoppingCart,
+  Banknote,
+  History,
+  Trophy,
+  Clock,
   ArrowRight,
-  ChevronRight 
+  ChevronRight
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { Player, Club, Standing } from '../../types';
@@ -151,7 +151,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStart, onNavigate }) =
 
   return (
     <div className="relative w-full min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8 sm:py-12 overflow-x-hidden selection:bg-[#155DFC] selection:text-white">
-      
+
       {/* Marca d'água Tática: Campo de Futebol Oficial Figma desenhado direto no fundo branco */}
       <div className="absolute inset-0 pointer-events-none select-none flex items-center justify-center opacity-75 z-0">
         <svg
@@ -164,10 +164,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStart, onNavigate }) =
         >
           {/* Contorno do gramado com cantos arredondados */}
           <rect x="30" y="20" width="1200" height="620" rx="28" ry="28" />
-          
+
           {/* Linha de Meio-Campo */}
           <line x1="630" y1="20" x2="630" y2="640" />
-          
+
           {/* Círculo Central e Ponto Central */}
           <circle cx="630" cy="330" r="85" />
           <circle cx="630" cy="330" r="3.5" fill="currentColor" />
@@ -192,13 +192,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStart, onNavigate }) =
 
       {/* Conteúdo Central Onboarding */}
       <div className="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto w-full">
-        
+
         {/* Logo Oficial 56x56 e Nome Passe */}
         <div className="flex items-center gap-3.5 mb-4">
-          <img 
-            src="/logo.png" 
-            alt="Passe Logo" 
-            className="w-[56px] h-[56px] rounded-2xl object-contain shadow-xs" 
+          <img
+            src="/logo.png"
+            alt="Passe Logo"
+            className="w-[56px] h-[56px] rounded-2xl object-contain shadow-xs"
           />
           <h1 className="text-3xl sm:text-[34px] font-bold tracking-tight text-zinc-900">
             Passe
@@ -292,7 +292,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStart, onNavigate }) =
                         {step.step}
                       </span>
                     </div>
-                    
+
                     {/* Conteúdo Central do Card */}
                     <div className="flex flex-col justify-center my-auto">
                       <h4 className="text-sm font-semibold text-zinc-900 group-hover:text-[#155DFC] transition-colors">
@@ -334,7 +334,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onStart, onNavigate }) =
                       {step.step}
                     </span>
                   </div>
-                  
+
                   <div className="flex flex-col justify-center my-auto">
                     <h4 className="text-sm font-semibold text-zinc-900 group-hover:text-[#155DFC] transition-colors">
                       {step.title}

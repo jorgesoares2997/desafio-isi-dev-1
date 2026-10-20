@@ -92,19 +92,31 @@ export const PlayerList: React.FC<PlayerListProps> = ({
   const [detailPlayer, setDetailPlayer] = useState<Player | null>(null);
   const [successPlayer, setSuccessPlayer] = useState<Player | null>(null);
 
-  // Popover menu state
-  const [menuPlayerId, setMenuPlayerId] = useState<number | null>(null);
+  // Popover menu state com posicionamento fixo para extrapolar a tabela
+  const [menuPlayer, setMenuPlayer] = useState<Player | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number; openUpwards: boolean } | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // Close action dropdown menu on outside click
+  // Close action dropdown menu on outside click, scroll or window resize
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuPlayerId(null);
+        setMenuPlayer(null);
+        setMenuPosition(null);
       }
     };
+    const handleScrollOrResize = () => {
+      setMenuPlayer(null);
+      setMenuPosition(null);
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
   }, []);
 
   // Fetch count metadata for tabs
@@ -367,7 +379,7 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                 {players.map((player) => {
                   const club = getClubName(player.club_id);
                   const palette = getAvatarColor(player.name);
-                  const isMenuOpen = menuPlayerId === player.id;
+                  const isMenuOpen = menuPlayer?.id === player.id;
 
                   return (
                     <tr
@@ -502,106 +514,35 @@ export const PlayerList: React.FC<PlayerListProps> = ({
                         )}
                       </td>
 
-                      {/* Actions Popover Trigger matching Figma Screenshot 2 */}
-                      <td className="py-3.5 px-4 text-right relative">
+                      {/* Actions Popover Trigger */}
+                      <td className="py-3.5 px-4 text-right">
                         <button
-                          onClick={() => setMenuPlayerId(isMenuOpen ? null : player.id)}
-                          className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (menuPlayer?.id === player.id) {
+                              setMenuPlayer(null);
+                              setMenuPosition(null);
+                              return;
+                            }
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const spaceBelow = window.innerHeight - rect.bottom;
+                            const openUpwards = spaceBelow < 260;
+                            setMenuPosition({
+                              top: openUpwards ? rect.top - 6 : rect.bottom + 6,
+                              right: Math.max(16, window.innerWidth - rect.right),
+                              openUpwards,
+                            });
+                            setMenuPlayer(player);
+                          }}
+                          className={`p-1.5 rounded-md transition cursor-pointer ${
+                            isMenuOpen
+                              ? 'text-zinc-900 bg-zinc-100'
+                              : 'text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100'
+                          }`}
                           aria-label={`Ações para ${player.name}`}
                         >
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
-
-                        {/* Dropdown Menu - 100% fiel ao Figma */}
-                        {isMenuOpen && (
-                          <div
-                            ref={menuRef}
-                            className="absolute right-4 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-[#E4E4E7] py-2 z-30 text-left animate-in fade-in zoom-in-95 duration-100 select-none"
-                          >
-                            {/* Nome do Jogador no topo do menu */}
-                            <div className="px-3.5 py-1.5 text-xs font-semibold text-[#686872] border-b border-[#E4E4E7]/60 truncate">
-                              {player.name}
-                            </div>
-
-                            {/* Opção 1: Ver detalhes */}
-                            <button
-                              onClick={() => {
-                                setDetailPlayer(player);
-                                setMenuPlayerId(null);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
-                            >
-                              <Eye className="w-4 h-4 text-zinc-500" />
-                              <span>Ver detalhes</span>
-                            </button>
-
-                            {/* Opção 2: Editar */}
-                            <button
-                              onClick={() => {
-                                setEditingPlayer(player);
-                                setMenuPlayerId(null);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
-                            >
-                              <Edit3 className="w-4 h-4 text-zinc-500" />
-                              <span>Editar</span>
-                            </button>
-
-                            {/* Opção 3: Alterar condição */}
-                            <button
-                              onClick={() => {
-                                setConditionPlayer(player);
-                                setMenuPlayerId(null);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
-                            >
-                              <Heart className="w-4 h-4 text-zinc-500" />
-                              <span>Alterar condição</span>
-                            </button>
-
-                            {/* Opção 4: Comprar (se o jogador estiver livre) */}
-                            {player.club_id === null && (
-                              <button
-                                onClick={() => {
-                                  setBuyingPlayer(player);
-                                  setMenuPlayerId(null);
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
-                              >
-                                <ShoppingCart className="w-4 h-4 text-zinc-500" />
-                                <span>Comprar</span>
-                              </button>
-                            )}
-
-                            <div className="border-t border-[#E4E4E7]/60 my-1" />
-
-                            {/* Opção 5: Excluir com nota explicativa */}
-                            <button
-                              onClick={() => {
-                                if (player.club_id === null) {
-                                  setDeletingPlayer(player);
-                                  setMenuPlayerId(null);
-                                }
-                              }}
-                              disabled={player.club_id !== null}
-                              className={`w-full flex flex-col items-start px-3.5 py-2 text-left transition ${
-                                player.club_id === null
-                                  ? 'hover:bg-rose-50/50 cursor-pointer text-rose-600'
-                                  : 'opacity-40 cursor-not-allowed text-zinc-400'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <Trash2 className="w-4 h-4" />
-                                <span className="text-xs font-medium">Excluir</span>
-                              </div>
-                              <span className="text-[10px] text-[#686872] mt-0.5 pl-6.5 leading-tight">
-                                {player.club_id === null
-                                  ? 'Disponível porque o jogador está livre.'
-                                  : 'Indisponível: jogador vinculado a um clube.'}
-                              </span>
-                            </button>
-                          </div>
-                        )}
                       </td>
                     </tr>
                   );
@@ -665,6 +606,103 @@ export const PlayerList: React.FC<PlayerListProps> = ({
         <p className="text-xs text-zinc-500 px-1 leading-relaxed">
           {getFootnoteText()}
         </p>
+      )}
+
+      {/* Floating Actions Popover - Extrapola os limites da tabela e do overflow-x */}
+      {menuPlayer && menuPosition && (
+        <div
+          ref={menuRef}
+          style={{
+            position: 'fixed',
+            top: menuPosition.openUpwards ? undefined : `${menuPosition.top}px`,
+            bottom: menuPosition.openUpwards ? `${window.innerHeight - menuPosition.top}px` : undefined,
+            right: `${menuPosition.right}px`,
+          }}
+          className="w-52 bg-white rounded-2xl shadow-xl border border-[#E4E4E7] py-2 z-50 text-left animate-in fade-in zoom-in-95 duration-100 select-none"
+        >
+          {/* Nome do Jogador no topo do menu */}
+          <div className="px-3.5 py-1.5 text-xs font-semibold text-[#686872] border-b border-[#E4E4E7]/60 truncate">
+            {menuPlayer.name}
+          </div>
+
+          {/* Opção 1: Ver detalhes */}
+          <button
+            onClick={() => {
+              setDetailPlayer(menuPlayer);
+              setMenuPlayer(null);
+            }}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
+          >
+            <Eye className="w-4 h-4 text-zinc-500" />
+            <span>Ver detalhes</span>
+          </button>
+
+          {/* Opção 2: Editar */}
+          <button
+            onClick={() => {
+              setEditingPlayer(menuPlayer);
+              setMenuPlayer(null);
+            }}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
+          >
+            <Edit3 className="w-4 h-4 text-zinc-500" />
+            <span>Editar</span>
+          </button>
+
+          {/* Opção 3: Alterar condição */}
+          <button
+            onClick={() => {
+              setConditionPlayer(menuPlayer);
+              setMenuPlayer(null);
+            }}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
+          >
+            <Heart className="w-4 h-4 text-zinc-500" />
+            <span>Alterar condição</span>
+          </button>
+
+          {/* Opção 4: Comprar (se o jogador estiver livre) */}
+          {menuPlayer.club_id === null && (
+            <button
+              onClick={() => {
+                setBuyingPlayer(menuPlayer);
+                setMenuPlayer(null);
+              }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-zinc-800 hover:bg-zinc-50 transition cursor-pointer"
+            >
+              <ShoppingCart className="w-4 h-4 text-zinc-500" />
+              <span>Comprar</span>
+            </button>
+          )}
+
+          <div className="border-t border-[#E4E4E7]/60 my-1" />
+
+          {/* Opção 5: Excluir com nota explicativa */}
+          <button
+            onClick={() => {
+              if (menuPlayer.club_id === null) {
+                setDeletingPlayer(menuPlayer);
+                setMenuPlayer(null);
+              }
+            }}
+            disabled={menuPlayer.club_id !== null}
+            className={`w-full flex flex-col items-start px-3.5 py-2 text-left transition ${
+              menuPlayer.club_id === null
+                ? 'hover:bg-rose-50/50 cursor-pointer text-rose-600'
+                : 'opacity-40 cursor-not-allowed text-zinc-400'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Trash2 className="w-4 h-4" />
+              <span className="text-xs font-medium">Excluir</span>
+            </div>
+            <span className="text-[10px] text-[#686872] mt-0.5 pl-6.5 leading-tight">
+              {menuPlayer.club_id === null
+                ? 'Disponível porque o jogador está livre.'
+                : 'Indisponível: jogador vinculado a um clube.'}
+            </span>
+          </button>
+        </div>
       )}
 
       {/* Modals and Drawers */}
