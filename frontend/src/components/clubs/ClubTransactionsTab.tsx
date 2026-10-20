@@ -89,6 +89,12 @@ export const ClubTransactionsTab: React.FC<ClubTransactionsTabProps> = ({ clubId
   const [csvToast, setCsvToast] = useState<{ open: boolean; message: string; submessage: string } | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dataRef = useRef<TransactionsListResponse | null>(null);
+  const clubRef = useRef<ClubDetail | undefined>(club);
+
+  useEffect(() => {
+    clubRef.current = club;
+  }, [club]);
 
   // Close player dropdown when clicking outside
   useEffect(() => {
@@ -100,6 +106,17 @@ export const ClubTransactionsTab: React.FC<ClubTransactionsTabProps> = ({ clubId
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Keep allTimePlayers populated with current club players as well
+  useEffect(() => {
+    if (club?.players) {
+      setAllTimePlayers((prev) => {
+        const map = new Map<number, string>(prev.map((p) => [p.id, p.name]));
+        club.players.forEach((p) => map.set(p.id, p.name));
+        return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+      });
+    }
+  }, [club?.players]);
 
   // Fetch transactions from API
   const fetchTransactions = useCallback(async () => {
@@ -120,7 +137,7 @@ export const ClubTransactionsTab: React.FC<ClubTransactionsTabProps> = ({ clubId
 
       // If neither is checked, return empty set
       if (!isCompraChecked && !isVendaChecked) {
-        setData({
+        const emptyData: TransactionsListResponse = {
           data: [],
           summary: {
             total_spent: 0,
@@ -129,13 +146,16 @@ export const ClubTransactionsTab: React.FC<ClubTransactionsTabProps> = ({ clubId
             total_penalties: 0,
             total_profit: 0,
           },
-        });
+        };
+        dataRef.current = emptyData;
+        setData(emptyData);
         setLoading(false);
         setLoadError(false);
         return;
       }
 
       const resp = await api.get<TransactionsListResponse>(`/clubs/${clubId}/transactions`, { params });
+      dataRef.current = resp.data;
       setData(resp.data);
       setLoadError(false);
 
@@ -144,15 +164,15 @@ export const ClubTransactionsTab: React.FC<ClubTransactionsTabProps> = ({ clubId
         setAllTimePlayers((prev) => {
           const map = new Map<number, string>(prev.map((p) => [p.id, p.name]));
           resp.data.data.forEach((t) => map.set(t.player_id, t.player_name));
-          if (club?.players) {
-            club.players.forEach((p) => map.set(p.id, p.name));
+          if (clubRef.current?.players) {
+            clubRef.current.players.forEach((p) => map.set(p.id, p.name));
           }
           return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
         });
       }
     } catch (err: unknown) {
       const msg = getApiErrorMessage(err);
-      if (!data) {
+      if (!dataRef.current) {
         setLoadError(true);
       } else {
         setFilterError(msg);
@@ -160,7 +180,7 @@ export const ClubTransactionsTab: React.FC<ClubTransactionsTabProps> = ({ clubId
     } finally {
       setLoading(false);
     }
-  }, [clubId, isCompraChecked, isVendaChecked, selectedPlayerId, club?.players, data]);
+  }, [clubId, isCompraChecked, isVendaChecked, selectedPlayerId]);
 
   useEffect(() => {
     fetchTransactions();
