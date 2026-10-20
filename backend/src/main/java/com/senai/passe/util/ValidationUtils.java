@@ -34,7 +34,7 @@ public final class ValidationUtils {
     }
 
     /**
-     * Valida e converte ID da URL. Qualquer ID inválido, zero, negativo, com zeros à esquerda
+     * Valida e converte ID da URL (Path Parameter). Qualquer ID inválido, zero, negativo, com zeros à esquerda
      * ou maior que Integer.MAX_VALUE deve responder 404 (Regra V8).
      */
     public static Long parsePositiveId(String idStr) {
@@ -49,6 +49,25 @@ public final class ValidationUtils {
             return val;
         } catch (NumberFormatException e) {
             throw new ResourceNotFoundException("ID inválido: " + idStr);
+        }
+    }
+
+    /**
+     * Valida e converte ID de filtro/query parameter (ex: club_id, player_id).
+     * Formato inválido, zero, negativo, zeros à esquerda ou não numérico deve responder 400 (Filtro inválido).
+     */
+    public static Long parsePositiveFilterId(String idStr, String paramName) {
+        if (idStr == null || !POSITIVE_INTEGER_PATTERN.matcher(idStr).matches()) {
+            throw new BadRequestException("Parâmetro de filtro '" + paramName + "' deve ser um inteiro positivo.");
+        }
+        try {
+            long val = Long.parseLong(idStr);
+            if (val > Integer.MAX_VALUE) {
+                throw new BadRequestException("Parâmetro de filtro '" + paramName + "' excede o valor máximo permitido.");
+            }
+            return val;
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Parâmetro de filtro '" + paramName + "' com formato inválido: " + idStr);
         }
     }
 

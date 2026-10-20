@@ -179,7 +179,7 @@ public class MatchService {
     public List<MatchSummaryResponse> listMatches(String clubIdStr) {
         List<Partida> partidas;
         if (clubIdStr != null) {
-            Long clubId = ValidationUtils.parsePositiveId(clubIdStr);
+            Long clubId = ValidationUtils.parsePositiveFilterId(clubIdStr, "club_id");
             if (!clubeRepository.existsById(clubId)) {
                 throw new ResourceNotFoundException("Clube não encontrado para o ID: " + clubId);
             }

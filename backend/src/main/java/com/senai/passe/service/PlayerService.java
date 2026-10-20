@@ -157,6 +157,9 @@ public class PlayerService {
         }
 
         if (clubId != null) {
+            if (clubId <= 0 || clubId > Integer.MAX_VALUE) {
+                throw new BadRequestException("Parâmetro de filtro 'club_id' deve ser um inteiro positivo.");
+            }
             if (!clubeRepository.existsById(clubId)) {
                 throw new ResourceNotFoundException("Clube não encontrado para o ID: " + clubId);
             }

@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class MarketService {
 
+    private static final ZoneOffset BRASILIA_OFFSET = ZoneOffset.of("-03:00");
     private static final DateTimeFormatter ISO_BRASILIA_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
     private final ClubeRepository clubeRepository;
@@ -229,7 +231,7 @@ public class MarketService {
 
         Long playerId = null;
         if (playerIdFilter != null) {
-            playerId = ValidationUtils.parsePositiveId(playerIdFilter);
+            playerId = ValidationUtils.parsePositiveFilterId(playerIdFilter, "player_id");
             if (!jogadorRepository.findByIdAndExcluidoEmIsNull(playerId).isPresent()) {
                 throw new ResourceNotFoundException("Jogador não encontrado.");
             }
@@ -301,7 +303,7 @@ public class MarketService {
         sb.append("data_hora;tipo;jogador;valor;taxa_ou_comissao;multa;lucro;variacao_caixa\n");
 
         for (TransactionResponse t : resp.data()) {
-            sb.append(t.createdAt().format(ISO_BRASILIA_SECONDS)).append(';');
+            sb.append(t.createdAt() != null ? t.createdAt().withOffsetSameInstant(BRASILIA_OFFSET).format(ISO_BRASILIA_SECONDS) : "").append(';');
             sb.append(t.type()).append(';');
             sb.append(escapeCsvName(t.playerName())).append(';');
             sb.append(formatCurrencyCsv(t.value())).append(';');
