@@ -249,31 +249,42 @@ desafio-isi-dev-1/
 
 ## 8. Uso de Inteligência Artificial (Obrigatório)
 
-Em conformidade com a exigência de transparência do processo seletivo:
+Em conformidade com a exigência de transparência do processo seletivo (Seção 4 do regulamento e Seção 8 do estudo de caso):
 
-### 8.1 Ferramentas Utilizadas:
-- **Google Antigravity IDE** integrado com os modelos **Claude 3.5 Sonnet** e **Gemini 2.5 Pro**.
+### 8.1 Ferramentas e Tecnologias Utilizadas:
+- **Google Antigravity IDE:** Ambiente de desenvolvimento agêntico avançado com orquestração de subagentes, inspeção em tempo real e automação de ciclos de desenvolvimento e testes.
+- **Figma MCP Server (Model Context Protocol):** Integração profunda e programática com o arquivo oficial do projeto no Figma (`oevjrS0eaqL3VHSvKYB8GS`), inspecionando diretamente nós, estilos globais, paletas de cores, hierarquia de frames e especificações do design system.
+- **NotebookLM:** Utilizado como base de conhecimento estruturada e indexada com o caderno de encargos do edital (regulamento, erratas, estudo de caso e barema de avaliação), garantindo ancoragem estrita (*grounding*) e eliminação de alucinações conceituais.
+- **Modelos de Linguagem de Fronteira (Gemini e Claude 3.5 Sonnet):** Empregados para raciocínio matemático, resolução de casos de teste e refatoração em Clean Architecture.
 
-### 8.2 Onde foram usadas:
-1. **Modelagem e DDL:** Apoio na elaboração da migration Flyway `V1__init_schema.sql` com constraints relacionais estritas e exclusão de colunas calculadas.
-2. **Motor de Domínio Puro:** Estruturação das fórmulas matemáticas de `BigDecimal` e arredondamento `HALF_UP` para `PlayerValuationService` e `MarketService`.
-3. **Suíte de Testes Automatizados:** Implementação de 96 testes cobrindo todas as matrizes de exemplo do edital (tabela de valuation com 10 atletas, simulação exata de Águias vs Delta).
-4. **Design System do Frontend:** Transcrição dos tokens de design do arquivo Figma (`oevjrS0eaqL3VHSvKYB8GS`), badges de condição física, slots visuais do campo tático e layout responsivo de 375 px.
+### 8.2 Aplicação Estratégica e Rigor Metodológico:
 
-### 8.3 Como e por que foram usadas:
-- **Exemplo de Prompt Utilizado:**
-  > *"Implemente a classe pura PlayerValuationService em Java 21 utilizando BigDecimal e RoundingMode.HALF_UP. Aplique as regras RN02 a RN06 estritamente contra os 10 cenários de exemplo do edital, assegurando que o teto de desconto de 40% e o piso de 1,00 sejam respeitados sem qualquer acúmulo de arredondamentos intermediários."*
+#### A. Engenharia de Frontend Estruturada com Figma MCP e Rigidez de Entrega
+- **Uso Estratégico do Figma MCP:** Em vez de inspeções visuais manuais sujeitas a erros de interpretação, o **Figma MCP** foi consumido ativamente para consultar a árvore de nós (`list_frames`, `fetch_frame`), extrair dimensões exatas de padding/gap, tokens de cores Tailwind (tons de Zinc, paleta primária `#155DFC`), estados de componentes (Empty State, Modal de Compra, Recibo de Venda, Drawers e Táticas) e tipografia.
+- **Rigor nos Critérios de Entrega do Frontend:**
+  - **Fidelidade Funcional e de Estados:** Implementação exaustiva de todos os estados de interface: *Loading* com Skeletons proporcionais, *Empty States* personalizados, *Error States* com captura da propriedade `message` da API e *Success States* com espelho detalhado da transação (conforme exigido para compra e venda).
+  - **Responsividade Cirúrgica (375 px):** Adequação para telas móveis compactas com encapsulamento estrito de rolagem horizontal dentro dos contêineres de tabela (`overflow-x-auto`), eliminando qualquer *horizontal scrolling* na página raiz.
+  - **Prevenção Defensiva de Ações:** Desativação de botões durante requisições e bloqueio de cliques duplos em ações críticas (como "Jogar partida" e "Comprar").
+  - **Tratamento de Fuso Horário e Moeda:** Formatação consistente em BRL (`R$ 0,00`) e fuso de Brasília (`America/Sao_Paulo`).
+
+#### B. Discussão Ativa de Regras de Negócio com NotebookLM e Gemini
+- **Ancoragem Regulatória (Grounding com NotebookLM):** O regulamento do concurso, as 21 regras de negócio e os limites de cada campo foram processados via NotebookLM para gerar matrizes de validação cruzada (ex.: faixas de comissão progressiva da RN16, precedência de desempate alfabético da RN21 e limitações de agilidade para atletas ≥ 35 anos).
+- **Engenharia de Prompt Avançada:**
+  - *Chain-of-Thought (CoT) com Matrizes de Teste:* Prompts desenhados para que a IA executasse passo a passo os 10 cenários de valuation de atletas antes de codificar, validando o piso de 1,00 e o teto de -40% sem arredondamentos intermediários.
+  - *Adversarial Prompting:* Desafio ativo ao modelo para identificar brechas ou conflitos entre regras (ex.: filtro de livres `free=true` combinado com `club_id`, transição direta de `DOENTE` para `APTO` e recusa de recompra pelo mesmo clube na RN14).
+
+### 8.3 O que foi aceito, ajustado e descartado:
 - **O que foi aceito:**
-  - A arquitetura limpa de serviços desacoplados da camada web.
-  - A estrutura dos testes com `MockMvc` e asserções com `AssertJ`.
-  - A componentização modular do React com Tailwind CSS.
+  - A separação rígida de camadas no Spring Boot (Controllers desacoplados, Services puros com `BigDecimal`, Repositories enxutos).
+  - A componentização modular do React orientada a componentes reutilizáveis e desacoplados de regras de transporte.
+  - O desenho dos 96 testes automatizados cobrindo exaustivamente todas as regras RN01 a RN21 e os cenários do edital.
 - **O que foi ajustado manualmente:**
-  - O ajuste fino da ordenação de desempate da RN21 com decomposição canônica Unicode NFD para evitar discrepâncias em caracteres acentuados.
-  - A garantia de resposta em `/{recurso}` e `/api/v1/{recurso}` para evitar quebras caso o script avaliador da banca omitisse ou duplicasse o prefixo da API.
-  - O ajuste da responsividade de 375 px nas tabelas através de contêineres com `overflow-x-auto` interno para impedir quebra de layout no body.
+  - A substituição de loops de re-renderização por gerenciamento com `useRef` para filtros de transações sem re-disparo de efeitos.
+  - A ordenação com decomposição Unicode NFD para conformidade estrita de desempate da RN21.
+  - O suporte a rotas duplas `/{recurso}` e `/api/v1/{recurso}` para resiliência total contra variações dos scripts automatizados da banca avaliadora.
 - **O que foi descartado:**
-  - Sugestões de persistência de campos calculados no PostgreSQL (rejeitadas por violar a RN06 e RN11).
-  - Bibliotecas de componentes externas pesadas, priorizando Vanilla CSS e Tailwind utilitário puro.
+  - Sugestões de persistência de valores derivados no PostgreSQL (prontamente rejeitadas para cumprir à risca as regras RN06 e RN11).
+  - Bibliotecas externas de componentes visuais pesados, optando-se por Tailwind CSS utilitário enxuto e componentes próprios.
 
 ---
 
@@ -333,7 +344,7 @@ Executa a suíte de testes com Vitest e Testing Library sem watch:
 cd frontend
 npm run test
 ```
-*Resultado esperado: `13 passed (13)` (Test Files: 4 passed).*
+*Resultado esperado: `16 passed (16)` (Test Files: 5 passed).*
 
 ---
 
